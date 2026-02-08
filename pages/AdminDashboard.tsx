@@ -84,6 +84,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     return days[d.getDay()];
   };
 
+  const getLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
   const checkPeriodMatch = (reportDate: Date, period: string, targetYear: string) => {
     const now = new Date();
     const reportYear = reportDate.getFullYear().toString();
@@ -157,7 +164,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const isOver24h = timeSinceMeeting >= (24 * 60 * 60 * 1000);
 
       if (isOver24h) {
-        const dateStr = lastMeetingDate.toISOString().split('T')[0];
+        const dateStr = getLocalDateString(lastMeetingDate);
 
         // Se já foi ignorado para ESTA data específica, não mostrar
         if (cell.dismissedLateDate === dateStr) return false;
@@ -192,7 +199,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     let diff = today.getDay() - meetingDayIndex;
     if (diff < 0) diff += 7;
     lastMeetingDate.setDate(today.getDate() - diff);
-    const dateStr = lastMeetingDate.toISOString().split('T')[0];
+    const dateStr = getLocalDateString(lastMeetingDate);
 
     onDismissLateAlert(cellId, dateStr);
   };
