@@ -24,6 +24,7 @@ export interface Cell {
   region: string;
   phone: string;
   leaderPhoto?: string; // Base64 da imagem do líder
+  dismissedLateDate?: string; // Data do alerta de atraso ignorador
 }
 
 export interface Report {

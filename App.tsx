@@ -71,7 +71,11 @@ const App: React.FC = () => {
     try {
       const { data: cellsData } = await supabase.from('cells').select('*');
       if (cellsData && cellsData.length > 0) {
-        setCells(cellsData.map(c => ({ ...c, leaderPhoto: c.leader_photo })));
+        setCells(cellsData.map(c => ({
+          ...c,
+          leaderPhoto: c.leader_photo,
+          dismissedLateDate: c.dismissed_late_date
+        })));
       }
 
       const { data: reportsData } = await supabase.from('reports').select('*').order('date', { ascending: false });
@@ -171,6 +175,11 @@ const App: React.FC = () => {
   const handleDeleteCell = async (id: string) => {
     setCells(prev => prev.filter(c => c.id !== id));
     await supabase.from('cells').delete().eq('id', id);
+  };
+
+  const handleDismissLateAlert = async (cellId: string, date: string) => {
+    setCells(prev => prev.map(c => c.id === cellId ? { ...c, dismissedLateDate: date } : c));
+    await supabase.from('cells').update({ dismissed_late_date: date }).eq('id', cellId);
   };
 
   // Funções de Relatórios
@@ -296,7 +305,7 @@ const App: React.FC = () => {
   return (
     <Layout role={authState.role} onLogout={handleLogout} activeTab={activeTab} setActiveTab={setActiveTab} cellName={authState.cell?.name} cellId={authState.cell?.id} leaderPhoto={authState.cell?.leaderPhoto} notifications={notifications} onMarkAsRead={markNotifRead} onDeleteNotification={deleteNotification}>
       {authState.role === 'admin' ? (
-        <AdminDashboard cells={cells} reports={reports} shares={shares} baptisms={baptisms} goals={goals} activeTab={activeTab} onAddShare={handleAddShare} onDeleteShare={handleDeleteShare} onAddBaptism={handleAddBaptism} onDeleteReport={handleDeleteReport} onUpdateCell={handleUpdateCell} onAddCell={handleAddCell} onDeleteCell={handleDeleteCell} onAddGoal={handleAddGoal} onUpdateGoal={handleUpdateGoal} onDeleteGoal={handleDeleteGoal} onNotify={addNotification} />
+        <AdminDashboard cells={cells} reports={reports} shares={shares} baptisms={baptisms} goals={goals} activeTab={activeTab} onAddShare={handleAddShare} onDeleteShare={handleDeleteShare} onAddBaptism={handleAddBaptism} onDeleteReport={handleDeleteReport} onUpdateCell={handleUpdateCell} onAddCell={handleAddCell} onDeleteCell={handleDeleteCell} onAddGoal={handleAddGoal} onUpdateGoal={handleUpdateGoal} onDeleteGoal={handleDeleteGoal} onNotify={addNotification} onDismissLateAlert={handleDismissLateAlert} />
       ) : (
         <LeaderDashboard cell={authState.cell!} reports={reports} shares={shares} activeTab={activeTab} setActiveTab={setActiveTab} onAddReport={handleAddReport} onUpdateReport={handleUpdateReport} onDeleteReport={handleDeleteReport} onNotify={addNotification} />
       )}

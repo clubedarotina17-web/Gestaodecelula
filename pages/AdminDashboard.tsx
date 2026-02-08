@@ -32,12 +32,13 @@ interface AdminDashboardProps {
   onUpdateGoal: (goal: Goal) => void;
   onDeleteGoal: (id: string) => void;
   onNotify: (title: string, message: string, type: 'visitor' | 'late' | 'event' | 'info' | 'notice', phone?: string, cellId?: string) => void;
+  onDismissLateAlert: (cellId: string, date: string) => void;
 }
 
 const WEEK_DAYS = ['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado', 'Domingo'];
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  cells = [], reports = [], shares = [], baptisms = [], goals = [], activeTab, onAddShare, onDeleteShare, onAddBaptism, onDeleteReport, onUpdateCell, onAddCell, onDeleteCell, onAddGoal, onUpdateGoal, onDeleteGoal, onNotify
+  cells = [], reports = [], shares = [], baptisms = [], goals = [], activeTab, onAddShare, onDeleteShare, onAddBaptism, onDeleteReport, onUpdateCell, onAddCell, onDeleteCell, onAddGoal, onUpdateGoal, onDeleteGoal, onNotify, onDismissLateAlert
 }) => {
   const [filterCell, setFilterCell] = useState('Todas');
   const [filterType, setFilterType] = useState<CellType | 'Todas'>('Todas');
@@ -46,8 +47,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [reportFilterDate, setReportFilterDate] = useState<string>('');
   const [reportFilterPeriod, setReportFilterPeriod] = useState<string>('all');
   const [reportFilterYear, setReportFilterYear] = useState<string>(new Date().getFullYear().toString());
-
-  const [dismissedLateAlerts, setDismissedLateAlerts] = useState<string[]>([]);
 
   const [noticeForm, setNoticeForm] = useState({ recipientId: 'all', title: '', message: '' });
   const [baptismForm, setBaptismForm] = useState({ name: '', whatsapp: '', date: '', cellName: '' });
@@ -142,8 +141,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     };
 
     return (cells || []).filter(cell => {
-      if (dismissedLateAlerts.includes(cell.id)) return false;
-
       const cellDayName = cell.day.split(' ')[0].trim();
       const meetingDayIndex = dayMap[cellDayName];
       if (meetingDayIndex === undefined) return false;
@@ -161,12 +158,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       if (isOver24h) {
         const dateStr = lastMeetingDate.toISOString().split('T')[0];
+
+        // Se já foi ignorado para ESTA data específica, não mostrar
+        if (cell.dismissedLateDate === dateStr) return false;
+
         const hasReport = (reports || []).some(r => r.cellId === cell.id && r.date === dateStr);
         return !hasReport;
       }
       return false;
     });
-  }, [cells, reports, dismissedLateAlerts]);
+  }, [cells, reports]);
 
   const handleChargeLeader = (cell: CellTypeData) => {
     if (!cell.phone) return alert("Esta célula não possui telefone cadastrado.");
@@ -175,8 +176,25 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  const handleDismissLateAlert = (id: string) => {
-    setDismissedLateAlerts(prev => [...prev, id]);
+  const handleDismissLateAlertInternal = (cellId: string) => {
+    // Pegar a data que gerou o alerta para persistir
+    const dayMap: { [key: string]: number } = {
+      'Domingo': 0, 'Segunda-Feira': 1, 'Terça-Feira': 2, 'Quarta-Feira': 3,
+      'Quinta-Feira': 4, 'Sexta-Feira': 5, 'Sábado': 6
+    };
+    const cell = cells.find(c => c.id === cellId);
+    if (!cell) return;
+
+    const cellDayName = cell.day.split(' ')[0].trim();
+    const meetingDayIndex = dayMap[cellDayName];
+    const today = new Date();
+    const lastMeetingDate = new Date(today);
+    let diff = today.getDay() - meetingDayIndex;
+    if (diff < 0) diff += 7;
+    lastMeetingDate.setDate(today.getDate() - diff);
+    const dateStr = lastMeetingDate.toISOString().split('T')[0];
+
+    onDismissLateAlert(cellId, dateStr);
   };
 
   const metricsData = useMemo(() => {
@@ -418,7 +436,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     </div>
                     <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
                       <button onClick={() => handleChargeLeader(cell)} className="p-2.5 md:p-3 bg-green-500 text-white rounded-xl md:rounded-2xl hover:bg-green-600 transition-all shadow-md shadow-green-500/20 active:scale-95"><MessageCircle className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
-                      <button onClick={() => handleDismissLateAlert(cell.id)} className="p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl md:rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"><X className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
+                      <button onClick={() => handleDismissLateAlertInternal(cell.id)} className="p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl md:rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"><X className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
                     </div>
                   </div>
                 ))}
