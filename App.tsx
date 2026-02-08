@@ -48,14 +48,33 @@ const App: React.FC = () => {
     cell: Cell | null;
     isAuthenticated: boolean;
     isConfirmed: boolean;
-  }>({
-    role: null,
-    cell: null,
-    isAuthenticated: false,
-    isConfirmed: false,
+  }>(() => {
+    const savedAuth = localStorage.getItem('viver_em_cristo_auth');
+    if (savedAuth) {
+      try {
+        return JSON.parse(savedAuth);
+      } catch (e) {
+        console.error('Erro ao restaurar sessão:', e);
+      }
+    }
+    return {
+      role: null,
+      cell: null,
+      isAuthenticated: false,
+      isConfirmed: false,
+    };
   });
 
-  const [activeTab, setActiveTab] = useState('cadastrar');
+  const [activeTab, setActiveTab] = useState(() => {
+    const savedAuth = localStorage.getItem('viver_em_cristo_auth');
+    if (savedAuth) {
+      try {
+        const auth = JSON.parse(savedAuth);
+        return auth.role === 'admin' ? 'admin-relatorios' : 'cadastrar';
+      } catch (e) { }
+    }
+    return 'cadastrar';
+  });
 
   // Persistir no LocalStorage sempre que houver mudanças
   useEffect(() => {
@@ -123,13 +142,18 @@ const App: React.FC = () => {
     return () => { supabase.removeChannel(channel); };
   }, []);
 
-  const handleLogin = (role: UserRole, cell: Cell | null) => {
-    setAuthState({ role, cell, isAuthenticated: true, isConfirmed: role === 'admin' });
+  const handleLogin = (role: UserRole, cell: Cell | null, rememberMe?: boolean) => {
+    const newState = { role, cell, isAuthenticated: true, isConfirmed: role === 'admin' };
+    setAuthState(newState);
+    if (rememberMe) {
+      localStorage.setItem('viver_em_cristo_auth', JSON.stringify(newState));
+    }
     setActiveTab(role === 'admin' ? 'admin-relatorios' : 'cadastrar');
   };
 
   const handleLogout = () => {
     setAuthState({ role: null, cell: null, isAuthenticated: false, isConfirmed: false });
+    localStorage.removeItem('viver_em_cristo_auth');
     setActiveTab('cadastrar');
   };
 

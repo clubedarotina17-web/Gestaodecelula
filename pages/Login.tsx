@@ -1,11 +1,10 @@
-
 import React, { useState } from 'react';
-import { User, ShieldCheck, ArrowRight, Home } from 'lucide-react';
+import { User, ShieldCheck, ArrowRight, Home, Eye, EyeOff } from 'lucide-react';
 import { UserRole, Cell } from '../types';
 import { ADMIN_PASSWORD } from '../constants';
 
 interface LoginProps {
-  onLogin: (role: UserRole, cell: Cell | null) => void;
+  onLogin: (role: UserRole, cell: Cell | null, rememberMe?: boolean) => void;
   cells: Cell[];
 }
 
@@ -13,14 +12,16 @@ const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
   const [role, setRole] = useState<UserRole>('leader');
   const [password, setPassword] = useState('');
   const [selectedCellId, setSelectedCellId] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [rememberMe, setRememberMe] = useState(false);
   const [error, setError] = useState('');
 
   const handleLogin = () => {
     setError('');
-    
+
     if (role === 'admin') {
       if (password === ADMIN_PASSWORD) {
-        onLogin('admin', null);
+        onLogin('admin', null, rememberMe);
       } else {
         setError('Senha incorreta para administrador.');
       }
@@ -39,9 +40,9 @@ const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
       <div className="w-full max-w-md bg-black rounded-[2.5rem] p-8 md:p-12 relative z-10 shadow-2xl border border-white/10">
         <div className="mb-10 text-center">
           <div className="inline-flex items-center justify-center w-24 h-24 bg-transparent mb-6 overflow-hidden">
-            <img 
-              src="https://lh3.googleusercontent.com/d/1zTjbN1NbTxTgtGtzhQ2ngvIyBHHxciDY" 
-              alt="Logo Viver em Cristo" 
+            <img
+              src="https://lh3.googleusercontent.com/d/1zTjbN1NbTxTgtGtzhQ2ngvIyBHHxciDY"
+              alt="Logo Viver em Cristo"
               className="w-full h-full object-contain"
             />
           </div>
@@ -85,19 +86,48 @@ const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
               </div>
             </div>
           ) : (
-            <div className="space-y-2">
-              <label className="text-sm font-bold text-gray-400 ml-1">Senha de Administrador</label>
-              <div className="relative group">
-                <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-secondary transition-colors">
-                  <ShieldCheck size={18} />
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <label className="text-sm font-bold text-gray-400 ml-1">Senha de Administrador</label>
+                <div className="relative group">
+                  <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-secondary transition-colors">
+                    <ShieldCheck size={18} />
+                  </div>
+                  <input
+                    type={showPassword ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Digite a senha..."
+                    className="w-full pl-11 pr-12 py-4 bg-white/5 text-white border-none rounded-2xl focus:ring-2 focus:ring-secondary/50 outline-none transition-all font-medium placeholder:text-gray-600"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute inset-y-0 right-0 pr-4 flex items-center text-gray-500 hover:text-secondary transition-colors"
+                  >
+                    {showPassword ? <EyeOff size={20} /> : <Eye size={20} />}
+                  </button>
                 </div>
-                <input
-                  type="password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  placeholder="Digite a senha..."
-                  className="w-full pl-11 pr-4 py-4 bg-white/5 text-white border-none rounded-2xl focus:ring-2 focus:ring-secondary/50 outline-none transition-all font-medium placeholder:text-gray-600"
-                />
+              </div>
+
+              <div className="flex items-center gap-3 ml-1">
+                <label className="flex items-center gap-3 cursor-pointer group">
+                  <div className="relative">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="peer sr-only"
+                    />
+                    <div className="w-5 h-5 bg-white/5 border border-white/10 rounded-md peer-checked:bg-secondary peer-checked:border-secondary transition-all"></div>
+                    <div className="absolute inset-0 flex items-center justify-center text-primary scale-0 peer-checked:scale-100 transition-transform">
+                      <svg width="12" height="12" viewBox="0 0 12 12" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M2.5 6L5 8.5L9.5 3.5" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" />
+                      </svg>
+                    </div>
+                  </div>
+                  <span className="text-xs font-bold text-gray-400 group-hover:text-gray-200 transition-colors uppercase tracking-widest">Manter conectado</span>
+                </label>
               </div>
             </div>
           )}
@@ -115,7 +145,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
             onClick={handleLogin}
             className="w-full py-6 bg-secondary hover:bg-secondary/90 text-primary rounded-2xl font-black text-xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-secondary/20 group active:scale-[0.98] ring-offset-2 ring-offset-black focus:ring-4 focus:ring-secondary/20"
           >
-            Acessar Sistema 
+            Acessar Sistema
             <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
           </button>
         </div>
