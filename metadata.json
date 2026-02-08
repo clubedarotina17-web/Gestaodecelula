@@ -1,0 +1,8 @@
+{
+  "name": "Viver em Cristo - Gestão de Célula",
+  "description": "Aplicativo para gestão de células da igreja Viver em Cristo, permitindo que líderes enviem relatórios e administradores gerenciem métricas, batismos e materiais compartilhados.",
+  "requestFramePermissions": [
+    "camera",
+    "microphone"
+  ]
+}
