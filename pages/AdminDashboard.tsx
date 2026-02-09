@@ -832,32 +832,68 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </button>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pb-12">
-            {events.length === 0 ? (
-              <div className="col-span-full bg-white p-20 rounded-[3rem] text-center border-2 border-dashed border-gray-100">
-                <Calendar className="mx-auto text-gray-200 mb-4" size={48} />
-                <p className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Nenhum evento agendado</p>
-              </div>
-            ) : (
-              events.map(event => (
-                <div key={event.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm relative group hover:shadow-xl transition-all">
-                  <button onClick={() => onDeleteEvent(event.id)} className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
-                  <div className="flex items-center gap-3 mb-4">
-                    <div className="bg-secondary/10 text-secondary p-3 rounded-2xl"><Calendar size={24} /></div>
-                    <div>
-                      <h4 className="font-black text-primary uppercase leading-tight">{event.title}</h4>
-                      <div className="flex items-center gap-2 mt-1">
-                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{new Date(event.date + 'T12:00:00').toLocaleDateString()}</span>
-                        <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${event.cellType === 'Todas' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'}`}>{event.cellType}</span>
+          <div className="space-y-12">
+            {/* Seção Próximos */}
+            <div className="space-y-6">
+              <h4 className="text-xs font-black uppercase text-gray-400 px-4 tracking-widest">Próximos Eventos</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4">
+                {events.filter(e => e.date >= new Date().toISOString().split('T')[0]).length === 0 ? (
+                  <div className="col-span-full bg-white p-20 rounded-[3rem] text-center border-2 border-dashed border-gray-100">
+                    <Calendar className="mx-auto text-gray-200 mb-4" size={48} />
+                    <p className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Nenhum evento agendado</p>
+                  </div>
+                ) : (
+                  events.filter(e => e.date >= new Date().toISOString().split('T')[0]).map(event => (
+                    <div key={event.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm relative group hover:shadow-xl transition-all overflow-hidden">
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-secondary"></div>
+                      <button onClick={() => onDeleteEvent(event.id)} className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                      <div className="flex items-center gap-3 mb-4">
+                        <div className="bg-secondary/10 text-secondary p-3 rounded-2xl"><Calendar size={24} /></div>
+                        <div>
+                          <h4 className="font-black text-primary uppercase leading-tight">{event.title}</h4>
+                          <div className="flex items-center gap-2 mt-1">
+                            <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{new Date(event.date + 'T12:00:00').toLocaleDateString()}</span>
+                            <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${event.cellType === 'Todas' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'}`}>{event.cellType}</span>
+                          </div>
+                        </div>
+                      </div>
+                      <p className="text-xs text-gray-500 font-medium mb-4">{event.description}</p>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
+                        <MapPin size={14} className="text-secondary" /> {event.location || 'Local não definido'}
                       </div>
                     </div>
-                  </div>
-                  <p className="text-xs text-gray-500 font-medium mb-4">{event.description}</p>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
-                    <MapPin size={14} className="text-secondary" /> {event.location || 'Local não definido'}
-                  </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Seção Realizados */}
+            {events.some(e => e.date < new Date().toISOString().split('T')[0]) && (
+              <div className="space-y-6">
+                <h4 className="text-xs font-black uppercase text-amber-500 px-4 tracking-widest">Eventos Realizados</h4>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pb-12">
+                  {events
+                    .filter(e => e.date < new Date().toISOString().split('T')[0])
+                    .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+                    .map(event => (
+                      <div key={event.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm relative group hover:shadow-xl transition-all overflow-hidden grayscale opacity-70">
+                        <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500"></div>
+                        <button onClick={() => onDeleteEvent(event.id)} className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                        <div className="flex items-center gap-3 mb-4">
+                          <div className="bg-amber-100 text-amber-600 p-3 rounded-2xl"><CheckCircle2 size={24} /></div>
+                          <div>
+                            <h4 className="font-black text-gray-500 uppercase leading-tight">{event.title}</h4>
+                            <div className="flex items-center gap-2 mt-1">
+                              <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{new Date(event.date + 'T12:00:00').toLocaleDateString()}</span>
+                            </div>
+                          </div>
+                        </div>
+                        <p className="text-[10px] font-black text-amber-600 uppercase">Evento concluído</p>
+                      </div>
+                    ))
+                  }
                 </div>
-              ))
+              </div>
             )}
           </div>
         </div>

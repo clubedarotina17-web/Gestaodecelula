@@ -617,38 +617,74 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
         </div>
       )}
 
-      {activeTab === 'eventos' && (
-        <div className="space-y-6 max-w-4xl mx-auto">
-          <h3 className="text-2xl font-black text-primary uppercase tracking-tighter px-2 flex items-center gap-3">
-            <Calendar className="text-secondary" size={28} /> Próximos Eventos
-          </h3>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {events.filter(e => e.cellType === 'Todas' || e.cellType === cell.type).length === 0 ? (
-              <div className="col-span-full bg-white p-20 rounded-[2rem] text-center border-2 border-dashed border-gray-100">
-                <Calendar className="mx-auto text-gray-200 mb-4" size={48} />
-                <p className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Nenhum evento agendado para sua célula</p>
-              </div>
-            ) : (
-              events.filter(e => e.cellType === 'Todas' || e.cellType === cell.type).map(event => (
-                <div key={event.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-lg transition-all relative overflow-hidden group">
-                  <div className="absolute top-0 left-0 w-1.5 h-full bg-secondary"></div>
-                  <div>
-                    <div className="flex items-center justify-between mb-4">
-                      <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{new Date(event.date + 'T12:00:00').toLocaleDateString()}</span>
-                      <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${event.cellType === 'Todas' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'}`}>{event.cellType}</span>
+      {activeTab === 'eventos' && (() => {
+        const todayStr = new Date().toISOString().split('T')[0];
+        const filteredEvents = events.filter(e => e.cellType === 'Todas' || e.cellType === cell.type);
+        const upcomingEvents = filteredEvents.filter(e => e.date >= todayStr);
+        const pastEvents = filteredEvents.filter(e => e.date < todayStr).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+
+        return (
+          <div className="space-y-12 max-w-4xl mx-auto">
+            {/* Próximos Eventos */}
+            <div className="space-y-6">
+              <h3 className="text-2xl font-black text-primary uppercase tracking-tighter px-2 flex items-center gap-3">
+                <Calendar className="text-secondary" size={28} /> Próximos Eventos
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {upcomingEvents.length === 0 ? (
+                  <div className="col-span-full bg-white p-20 rounded-[2rem] text-center border-2 border-dashed border-gray-100">
+                    <Calendar className="mx-auto text-gray-200 mb-4" size={48} />
+                    <p className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Nenhum evento agendado para sua célula</p>
+                  </div>
+                ) : (
+                  upcomingEvents.map(event => (
+                    <div key={event.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-lg transition-all relative overflow-hidden group">
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-secondary"></div>
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{new Date(event.date + 'T12:00:00').toLocaleDateString()}</span>
+                          <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${event.cellType === 'Todas' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'}`}>{event.cellType}</span>
+                        </div>
+                        <h4 className="text-xl font-black text-primary uppercase leading-tight mb-3 group-hover:text-secondary transition-colors">{event.title}</h4>
+                        <p className="text-xs text-gray-500 font-medium mb-6 line-clamp-3">{event.description}</p>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-primary mt-auto">
+                        <MapPin size={16} className="text-secondary" /> {event.location || 'Local a definir'}
+                      </div>
                     </div>
-                    <h4 className="text-xl font-black text-primary uppercase leading-tight mb-3 group-hover:text-secondary transition-colors">{event.title}</h4>
-                    <p className="text-xs text-gray-500 font-medium mb-6 line-clamp-3">{event.description}</p>
-                  </div>
-                  <div className="flex items-center gap-1.5 text-xs font-bold text-primary mt-auto">
-                    <MapPin size={16} className="text-secondary" /> {event.location || 'Local a definir'}
-                  </div>
+                  ))
+                )}
+              </div>
+            </div>
+
+            {/* Eventos Realizados */}
+            {pastEvents.length > 0 && (
+              <div className="space-y-6">
+                <h3 className="text-xl font-black text-gray-400 uppercase tracking-tighter px-2 flex items-center gap-3">
+                  <CheckCircle2 className="text-amber-500" size={24} /> Eventos Realizados
+                </h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {pastEvents.map(event => (
+                    <div key={event.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-lg transition-all relative overflow-hidden group grayscale opacity-70">
+                      <div className="absolute top-0 left-0 w-1.5 h-full bg-amber-500"></div>
+                      <div>
+                        <div className="flex items-center justify-between mb-4">
+                          <span className="text-[10px] font-black text-gray-400 uppercase tracking-[0.2em]">{new Date(event.date + 'T12:00:00').toLocaleDateString()}</span>
+                          <span className={`text-[8px] font-black px-2 py-0.5 rounded-full bg-gray-50 text-gray-400`}>{event.cellType}</span>
+                        </div>
+                        <h4 className="text-lg font-black text-gray-400 uppercase leading-tight mb-3">{event.title}</h4>
+                      </div>
+                      <div className="flex items-center gap-1.5 text-xs font-bold text-gray-400 mt-auto">
+                        <CheckCircle2 size={16} className="text-amber-500" /> Evento concluído em {new Date(event.date + 'T12:00:00').toLocaleDateString()}
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              ))
+              </div>
             )}
           </div>
-        </div>
-      )}
+        );
+      })()}
     </div>
   );
 };
