@@ -286,7 +286,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   }, [reports, cells, filterCell, filterType, reportFilterPeriod, reportFilterYear]);
 
   const COLORS = ['#00b4bc', '#000000', '#050426', '#10b981'];
-  const CONSOLIDATION_COLORS = ['#00b4bc', '#cbd5e1'];
+  const CONSOLIDATION_COLORS = ['#6366f1', '#f59e0b'];
 
   const handleOpenCellForm = (cell?: CellTypeData) => {
     if (cell) {
