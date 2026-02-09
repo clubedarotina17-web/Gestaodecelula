@@ -94,7 +94,10 @@ const App: React.FC = () => {
 
   const fetchData = async () => {
     try {
-      const { data: cellsData } = await supabase.from('cells').select('*');
+      console.log('Iniciando sincronização com Supabase...');
+
+      const { data: cellsData, error: cellsError } = await supabase.from('cells').select('*');
+      if (cellsError) console.error('Erro ao buscar células:', cellsError);
       if (cellsData && cellsData.length > 0) {
         setCells(cellsData.map(c => ({
           ...c,
@@ -103,24 +106,35 @@ const App: React.FC = () => {
         })));
       }
 
-      const { data: reportsData } = await supabase.from('reports').select('*').order('date', { ascending: false });
+      const { data: reportsData, error: reportsError } = await supabase.from('reports').select('*').order('date', { ascending: false });
+      if (reportsError) console.error('Erro ao buscar relatórios:', reportsError);
       if (reportsData) {
         setReports(reportsData.map(r => ({
           id: r.id, cellId: r.cell_id, cellName: r.cell_name, date: r.date,
-          attendance: r.attendance, visitors: r.visitors, conversions: r.conversions,
-          weeklyVisits: r.weekly_visits, firstTimeVisitorsCount: r.first_time_visitors_count,
-          firstTimeVisitorsList: r.first_time_visitors_list, childrenCount: r.children_count,
-          offering: r.offering, kidsOffering: r.kids_offering, summary: r.summary, isLate: r.is_late
+          attendance: Number(r.attendance),
+          visitors: Number(r.visitors),
+          conversions: Number(r.conversions),
+          weeklyVisits: Number(r.weekly_visits),
+          firstTimeVisitorsCount: Number(r.first_time_visitors_count),
+          firstTimeVisitorsList: r.first_time_visitors_list,
+          childrenCount: Number(r.children_count),
+          offering: Number(r.offering),
+          kidsOffering: Number(r.kids_offering),
+          summary: r.summary,
+          isLate: r.is_late
         })));
       }
 
-      const { data: sharesData } = await supabase.from('shares').select('*').order('created_at', { ascending: false });
+      const { data: sharesData, error: sharesError } = await supabase.from('shares').select('*').order('created_at', { ascending: false });
+      if (sharesError) console.error('Erro ao buscar compartilhamentos:', sharesError);
       if (sharesData) setShares(sharesData);
 
-      const { data: baptismsData } = await supabase.from('baptisms').select('*');
+      const { data: baptismsData, error: baptismsError } = await supabase.from('baptisms').select('*');
+      if (baptismsError) console.error('Erro ao buscar batismos:', baptismsError);
       if (baptismsData) setBaptisms(baptismsData);
 
-      const { data: goalsData } = await supabase.from('goals').select('*');
+      const { data: goalsData, error: goalsError } = await supabase.from('goals').select('*');
+      if (goalsError) console.error('Erro ao buscar metas:', goalsError);
       if (goalsData) {
         setGoals(goalsData.map(g => ({
           id: g.id, name: g.name, startDate: g.start_date, endDate: g.end_date,
@@ -128,22 +142,27 @@ const App: React.FC = () => {
         })));
       }
 
-      const { data: notifsData } = await supabase.from('notifications').select('*').order('created_at', { ascending: false });
+      const { data: notifsData, error: notifsError } = await supabase.from('notifications').select('*').order('created_at', { ascending: false });
+      if (notifsError) console.error('Erro ao buscar notificações:', notifsError);
       if (notifsData) {
         setNotifications(notifsData.map(n => ({
           id: n.id, title: n.title, message: n.message, type: n.type, isRead: n.is_read,
           date: n.created_at, visitorPhone: n.visitor_phone, cellId: n.cell_id
         })));
       }
-      const { data: eventsData } = await supabase.from('events').select('*').order('date', { ascending: true });
+
+      const { data: eventsData, error: eventsError } = await supabase.from('events').select('*').order('date', { ascending: true });
+      if (eventsError) console.error('Erro ao buscar eventos:', eventsError);
       if (eventsData) {
         setEvents(eventsData.map(e => ({
           id: e.id, title: e.title, description: e.description, date: e.date,
           location: e.location, cellType: e.cell_type
         })));
       }
+
+      console.log('Sincronização concluída com sucesso.');
     } catch (error) {
-      console.error('Erro ao carregar dados:', error);
+      console.error('Erro crítico na sincronização:', error);
     } finally {
       setLoading(false);
     }
@@ -225,7 +244,7 @@ const App: React.FC = () => {
     const newReport = { ...newReportData, id: tempId };
     setReports(prev => [newReport, ...prev]);
 
-    const { data } = await supabase.from('reports').insert([{
+    const { error } = await supabase.from('reports').insert([{
       id: tempId,
       cell_id: newReportData.cellId, cell_name: newReportData.cellName, date: newReportData.date,
       attendance: newReportData.attendance, visitors: newReportData.visitors, conversions: newReportData.conversions,
@@ -233,7 +252,12 @@ const App: React.FC = () => {
       first_time_visitors_list: newReportData.firstTimeVisitorsList, children_count: newReportData.childrenCount,
       offering: newReportData.offering, kids_offering: newReportData.kidsOffering, summary: newReportData.summary,
       is_late: newReportData.isLate
-    }]).select();
+    }]);
+
+    if (error) {
+      console.error('Erro ao salvar relatório:', error);
+      alert('Erro ao salvar no banco de dados. Verifique sua conexão.');
+    }
 
     if (newReportData.firstTimeVisitorsCount > 0 && newReportData.firstTimeVisitorsList) {
       newReportData.firstTimeVisitorsList.forEach(v => {
@@ -266,12 +290,17 @@ const App: React.FC = () => {
     const newGoal = { ...newGoalData, id: tempId };
     setGoals(prev => [...prev, newGoal]);
 
-    await supabase.from('goals').insert([{
+    const { error } = await supabase.from('goals').insert([{
       id: tempId,
       name: newGoalData.name, start_date: newGoalData.startDate, end_date: newGoalData.endDate,
       objective: newGoalData.objective, cell_type: newGoalData.cellType, cell_id: newGoalData.cellId,
       report: newGoalData.report, is_completed: newGoalData.isCompleted
     }]);
+
+    if (error) {
+      console.error('Erro ao salvar meta:', error);
+      alert('Erro ao salvar meta no banco.');
+    }
   };
 
   const handleUpdateGoal = async (updatedGoal: Goal) => {
