@@ -2,7 +2,7 @@
 // Completed the component implementation and added the missing default export to fix the import error in App.tsx.
 import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { Send, FileText, Download, User, Users, MapPin, Calendar, Clock, Star, Mic, MicOff, Phone, Plus, CheckCircle2, Save, Pencil, MessageCircle, AlertCircle, TrendingUp, Search, Filter, X, Baby, CheckCircle, Heart, DollarSign, Footprints, Sparkles, Layers, Landmark, Share2 } from 'lucide-react';
-import { Cell, Report, Share, Visitor } from '../types';
+import { Cell, Report, Share, Visitor, AppEvent } from '../types';
 
 interface LeaderDashboardProps {
   cell: Cell;
@@ -14,9 +14,10 @@ interface LeaderDashboardProps {
   onUpdateReport: (report: Report) => void;
   onDeleteReport: (id: string) => void;
   onNotify: (title: string, message: string, type: 'visitor' | 'late' | 'event' | 'info' | 'notice', phone?: string) => void;
+  events: AppEvent[];
 }
 
-const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares, activeTab, setActiveTab, onAddReport, onUpdateReport, onNotify }) => {
+const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares, events = [], activeTab, setActiveTab, onAddReport, onUpdateReport, onNotify }) => {
   const [editingId, setEditingId] = useState<string | null>(null);
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
@@ -608,6 +609,39 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                     <a href={share.fileUrl} target="_blank" rel="noreferrer" className="text-secondary font-black text-[10px] uppercase tracking-widest flex items-center gap-1 hover:underline">
                       <Download size={14} /> Baixar
                     </a>
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
+      )}
+
+      {activeTab === 'eventos' && (
+        <div className="space-y-6 max-w-4xl mx-auto">
+          <h3 className="text-2xl font-black text-primary uppercase tracking-tighter px-2 flex items-center gap-3">
+            <Calendar className="text-secondary" size={28} /> Próximos Eventos
+          </h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {events.filter(e => e.cellType === 'Todas' || e.cellType === cell.type).length === 0 ? (
+              <div className="col-span-full bg-white p-20 rounded-[2rem] text-center border-2 border-dashed border-gray-100">
+                <Calendar className="mx-auto text-gray-200 mb-4" size={48} />
+                <p className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Nenhum evento agendado para sua célula</p>
+              </div>
+            ) : (
+              events.filter(e => e.cellType === 'Todas' || e.cellType === cell.type).map(event => (
+                <div key={event.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm flex flex-col justify-between hover:shadow-lg transition-all relative overflow-hidden group">
+                  <div className="absolute top-0 left-0 w-1.5 h-full bg-secondary"></div>
+                  <div>
+                    <div className="flex items-center justify-between mb-4">
+                      <span className="text-[10px] font-black text-secondary uppercase tracking-[0.2em]">{new Date(event.date + 'T12:00:00').toLocaleDateString()}</span>
+                      <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${event.cellType === 'Todas' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'}`}>{event.cellType}</span>
+                    </div>
+                    <h4 className="text-xl font-black text-primary uppercase leading-tight mb-3 group-hover:text-secondary transition-colors">{event.title}</h4>
+                    <p className="text-xs text-gray-500 font-medium mb-6 line-clamp-3">{event.description}</p>
+                  </div>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-primary mt-auto">
+                    <MapPin size={16} className="text-secondary" /> {event.location || 'Local a definir'}
                   </div>
                 </div>
               ))

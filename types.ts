@@ -61,6 +61,15 @@ export interface Share {
   fileUrl: string;
 }
 
+export interface AppEvent {
+  id: string;
+  title: string;
+  description: string;
+  date: string;
+  location: string;
+  cellType: CellType | 'Todas';
+}
+
 export interface Goal {
   id: string;
   name: string;

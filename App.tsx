@@ -7,7 +7,7 @@ import Layout from './components/Layout';
 import LeaderDashboard from './pages/LeaderDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import CellConfirmation from './pages/CellConfirmation';
-import { UserRole, Cell, Report, Share, Baptism, AppNotification, Goal } from './types';
+import { UserRole, Cell, Report, Share, Baptism, AppNotification, Goal, AppEvent } from './types';
 import { INITIAL_CELLS } from './constants';
 
 const App: React.FC = () => {
@@ -34,6 +34,11 @@ const App: React.FC = () => {
 
   const [goals, setGoals] = useState<Goal[]>(() => {
     const saved = localStorage.getItem('viver_em_cristo_goals');
+    return saved ? JSON.parse(saved) : [];
+  });
+
+  const [events, setEvents] = useState<AppEvent[]>(() => {
+    const saved = localStorage.getItem('viver_em_cristo_events');
     return saved ? JSON.parse(saved) : [];
   });
 
@@ -83,8 +88,9 @@ const App: React.FC = () => {
     localStorage.setItem('viver_em_cristo_shares', JSON.stringify(shares));
     localStorage.setItem('viver_em_cristo_baptisms', JSON.stringify(baptisms));
     localStorage.setItem('viver_em_cristo_goals', JSON.stringify(goals));
+    localStorage.setItem('viver_em_cristo_events', JSON.stringify(events));
     localStorage.setItem('viver_em_cristo_notifications', JSON.stringify(notifications));
-  }, [cells, reports, shares, baptisms, goals, notifications]);
+  }, [cells, reports, shares, baptisms, goals, events, notifications]);
 
   const fetchData = async () => {
     try {
@@ -127,6 +133,13 @@ const App: React.FC = () => {
         setNotifications(notifsData.map(n => ({
           id: n.id, title: n.title, message: n.message, type: n.type, isRead: n.is_read,
           date: n.created_at, visitorPhone: n.visitor_phone, cellId: n.cell_id
+        })));
+      }
+      const { data: eventsData } = await supabase.from('events').select('*').order('date', { ascending: true });
+      if (eventsData) {
+        setEvents(eventsData.map(e => ({
+          id: e.id, title: e.title, description: e.description, date: e.date,
+          location: e.location, cellType: e.cell_type
         })));
       }
     } catch (error) {
@@ -310,6 +323,24 @@ const App: React.FC = () => {
     await supabase.from('baptisms').insert([newBaptismData]);
   };
 
+  const handleAddEvent = async (newEventData: Omit<AppEvent, 'id'>) => {
+    const tempId = Math.random().toString(36).substr(2, 9);
+    const newEvent = { ...newEventData, id: tempId };
+    setEvents(prev => [...prev, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
+    await supabase.from('events').insert([{
+      title: newEventData.title,
+      description: newEventData.description,
+      date: newEventData.date,
+      location: newEventData.location,
+      cell_type: newEventData.cellType
+    }]);
+  };
+
+  const handleDeleteEvent = async (id: string) => {
+    setEvents(prev => prev.filter(e => e.id !== id));
+    await supabase.from('events').delete().eq('id', id);
+  };
+
   if (loading && !authState.isAuthenticated) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 text-center">
@@ -329,9 +360,9 @@ const App: React.FC = () => {
   return (
     <Layout role={authState.role} onLogout={handleLogout} activeTab={activeTab} setActiveTab={setActiveTab} cellName={authState.cell?.name} cellId={authState.cell?.id} leaderPhoto={authState.cell?.leaderPhoto} notifications={notifications} onMarkAsRead={markNotifRead} onDeleteNotification={deleteNotification}>
       {authState.role === 'admin' ? (
-        <AdminDashboard cells={cells} reports={reports} shares={shares} baptisms={baptisms} goals={goals} activeTab={activeTab} onAddShare={handleAddShare} onDeleteShare={handleDeleteShare} onAddBaptism={handleAddBaptism} onDeleteReport={handleDeleteReport} onUpdateCell={handleUpdateCell} onAddCell={handleAddCell} onDeleteCell={handleDeleteCell} onAddGoal={handleAddGoal} onUpdateGoal={handleUpdateGoal} onDeleteGoal={handleDeleteGoal} onNotify={addNotification} onDismissLateAlert={handleDismissLateAlert} />
+        <AdminDashboard cells={cells} reports={reports} shares={shares} baptisms={baptisms} goals={goals} events={events} activeTab={activeTab} onAddShare={handleAddShare} onDeleteShare={handleDeleteShare} onAddBaptism={handleAddBaptism} onDeleteReport={handleDeleteReport} onUpdateCell={handleUpdateCell} onAddCell={handleAddCell} onDeleteCell={handleDeleteCell} onAddGoal={handleAddGoal} onUpdateGoal={handleUpdateGoal} onDeleteGoal={handleDeleteGoal} onNotify={addNotification} onDismissLateAlert={handleDismissLateAlert} onAddEvent={handleAddEvent} onDeleteEvent={handleDeleteEvent} />
       ) : (
-        <LeaderDashboard cell={authState.cell!} reports={reports} shares={shares} activeTab={activeTab} setActiveTab={setActiveTab} onAddReport={handleAddReport} onUpdateReport={handleUpdateReport} onDeleteReport={handleDeleteReport} onNotify={addNotification} />
+        <LeaderDashboard cell={authState.cell!} reports={reports} shares={shares} events={events} activeTab={activeTab} setActiveTab={setActiveTab} onAddReport={handleAddReport} onUpdateReport={handleUpdateReport} onDeleteReport={handleDeleteReport} onNotify={addNotification} />
       )}
     </Layout>
   );

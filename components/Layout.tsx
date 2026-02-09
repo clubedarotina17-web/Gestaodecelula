@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Menu, X, LogOut, ChevronRight, FileText, Share2, Users, PieChart, Droplets, MapPin, Bell, MessageCircle, Trash2, Megaphone, Target, Cloud, CloudOff } from 'lucide-react';
+import { Menu, X, LogOut, ChevronRight, FileText, Share2, Users, PieChart, Droplets, MapPin, Bell, MessageCircle, Trash2, Megaphone, Target, Cloud, CloudOff, Calendar } from 'lucide-react';
 import { UserRole, AppNotification } from '../types';
 
 interface LayoutProps {
@@ -25,11 +25,13 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
     { id: 'cadastrar', label: 'Cadastrar Relatório', icon: <FileText size={20} /> },
     { id: 'relatorios', label: 'Relatórios Cadastrados', icon: <ChevronRight size={20} /> },
     { id: 'compartilhamentos', label: 'Compartilhamentos', icon: <Share2 size={20} /> },
+    { id: 'eventos', label: 'Eventos', icon: <Calendar size={20} /> },
   ];
 
   const adminTabs = [
     { id: 'admin-relatorios', label: 'Relatórios Cadastrados', icon: <FileText size={20} /> },
     { id: 'admin-compartilhamentos', label: 'Compartilhamentos', icon: <Share2 size={20} /> },
+    { id: 'admin-eventos', label: 'Eventos', icon: <Calendar size={20} /> },
     { id: 'admin-batismo', label: 'Batismo', icon: <Droplets size={20} /> },
     { id: 'admin-celulas', label: 'Nossas Células', icon: <MapPin size={20} /> },
     { id: 'admin-metricas', label: 'Métricas', icon: <PieChart size={20} /> },
@@ -52,7 +54,7 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
     if (!notification.visitorPhone) return;
     const cleanPhone = notification.visitorPhone.replace(/\D/g, '');
     let message = '';
-    
+
     if (notification.type === 'visitor') {
       message = `Olá! Recebemos a notícia da sua visita na nossa Célula Viver em Cristo. Que alegria ter você conosco! Seja muito bem-vindo(a).`;
     } else if (notification.type === 'late') {
@@ -68,7 +70,7 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
     <div className="min-h-screen flex flex-col bg-[#f5f5f5]">
       <header className="bg-primary text-textLight px-4 py-3 flex items-center justify-between shadow-md sticky top-0 z-50 border-none">
         <div className="flex items-center gap-3">
-          <button 
+          <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
             className="p-2 hover:bg-gray-800 rounded-lg transition-colors"
             aria-label="Abrir menu"
@@ -84,10 +86,10 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
             </div>
           </div>
         </div>
-        
+
         <div className="flex items-center gap-2 md:gap-4">
           <div className="relative">
-            <button 
+            <button
               onClick={() => setIsNotifOpen(!isNotifOpen)}
               className="p-2 hover:bg-gray-800 rounded-full transition-all relative group"
             >
@@ -110,8 +112,8 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
                     <div className="p-8 text-center text-gray-400 text-xs font-bold uppercase">Nenhuma notificação</div>
                   ) : (
                     filteredNotifications.map(n => (
-                      <div 
-                        key={n.id} 
+                      <div
+                        key={n.id}
                         className={`p-4 border-b border-gray-50 flex flex-col gap-2 hover:bg-gray-50 transition-colors ${!n.isRead ? 'bg-secondary/5' : ''}`}
                         onClick={() => onMarkAsRead(n.id)}
                       >
@@ -122,7 +124,7 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
                             <p className="text-[9px] text-gray-400 mt-2 font-bold">{new Date(n.date).toLocaleTimeString()}</p>
                           </div>
                           <div className="flex flex-col gap-2">
-                            <button 
+                            <button
                               onClick={(e) => {
                                 e.stopPropagation();
                                 onDeleteNotification(n.id);
@@ -133,7 +135,7 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
                               <X size={14} />
                             </button>
                             {(n.type === 'visitor' || (n.type === 'late' && role === 'admin')) && n.visitorPhone && (
-                              <button 
+                              <button
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   handleWhatsAppFromNotif(n);
@@ -162,8 +164,8 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
 
       <div className="flex flex-1 relative overflow-hidden">
         {isMenuOpen && (
-          <div 
-            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity" 
+          <div
+            className="fixed inset-0 bg-black/60 backdrop-blur-sm z-40 transition-opacity"
             onClick={() => setIsMenuOpen(false)}
           />
         )}
@@ -182,11 +184,10 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
                     setActiveTab(tab.id);
                     setIsMenuOpen(false);
                   }}
-                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 ${
-                    activeTab === tab.id 
-                      ? 'bg-secondary text-white shadow-lg shadow-secondary/30 font-bold' 
-                      : 'text-gray-600 hover:bg-gray-50 font-medium'
-                  }`}
+                  className={`w-full flex items-center gap-3 px-4 py-3.5 rounded-2xl transition-all duration-200 ${activeTab === tab.id
+                    ? 'bg-secondary text-white shadow-lg shadow-secondary/30 font-bold'
+                    : 'text-gray-600 hover:bg-gray-50 font-medium'
+                    }`}
                 >
                   <span className={activeTab === tab.id ? 'text-white' : 'text-secondary'}>{tab.icon}</span>
                   <span>{tab.label}</span>
@@ -196,7 +197,7 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
           </div>
 
           <div className="p-6 border-t border-gray-100 bg-gray-50/50">
-            <button 
+            <button
               onClick={onLogout}
               className="w-full flex items-center justify-center gap-2 bg-darker hover:bg-black text-white py-4 rounded-2xl font-bold transition-all shadow-lg active:scale-[0.98]"
             >

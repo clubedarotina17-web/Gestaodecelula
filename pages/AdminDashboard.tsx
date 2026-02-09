@@ -8,7 +8,7 @@ import {
   Home, ChevronDown, Droplets, Trash2, LineChart as LucideLineChart, Landmark, Download, GraduationCap, PenTool, UserPlus,
   ArrowUpRight, ArrowDownRight, MessageSquareText, Coins, Megaphone, Camera, User, Clock, Briefcase, BellRing, Activity, Target, Flag, CheckCircle
 } from 'lucide-react';
-import { Cell as CellTypeData, Report, Share, Baptism, CellType, Visitor, Goal } from '../types';
+import { Cell as CellTypeData, Report, Share, Baptism, CellType, Visitor, Goal, AppEvent } from '../types';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
   PieChart as RePieChart, Pie, Cell as ReCell, Legend, LineChart, Line, ComposedChart, Area
@@ -33,12 +33,15 @@ interface AdminDashboardProps {
   onDeleteGoal: (id: string) => void;
   onNotify: (title: string, message: string, type: 'visitor' | 'late' | 'event' | 'info' | 'notice', phone?: string, cellId?: string) => void;
   onDismissLateAlert: (cellId: string, date: string) => void;
+  events: AppEvent[];
+  onAddEvent: (event: Omit<AppEvent, 'id'>) => void;
+  onDeleteEvent: (id: string) => void;
 }
 
 const WEEK_DAYS = ['Segunda-Feira', 'Terça-Feira', 'Quarta-Feira', 'Quinta-Feira', 'Sexta-Feira', 'Sábado', 'Domingo'];
 
 const AdminDashboard: React.FC<AdminDashboardProps> = ({
-  cells = [], reports = [], shares = [], baptisms = [], goals = [], activeTab, onAddShare, onDeleteShare, onAddBaptism, onDeleteReport, onUpdateCell, onAddCell, onDeleteCell, onAddGoal, onUpdateGoal, onDeleteGoal, onNotify, onDismissLateAlert
+  cells = [], reports = [], shares = [], baptisms = [], goals = [], events = [], activeTab, onAddShare, onDeleteShare, onAddBaptism, onDeleteReport, onUpdateCell, onAddCell, onDeleteCell, onAddGoal, onUpdateGoal, onDeleteGoal, onNotify, onDismissLateAlert, onAddEvent, onDeleteEvent
 }) => {
   const [filterCell, setFilterCell] = useState('Todas');
   const [filterType, setFilterType] = useState<CellType | 'Todas'>('Todas');
@@ -51,6 +54,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [noticeForm, setNoticeForm] = useState({ recipientId: 'all', title: '', message: '' });
   const [baptismForm, setBaptismForm] = useState({ name: '', whatsapp: '', date: '', cellName: '' });
   const [shareForm, setShareForm] = useState({ title: '', description: '', fileUrl: '' });
+  const [eventForm, setEventForm] = useState<Omit<AppEvent, 'id'>>({ title: '', description: '', date: '', location: '', cellType: 'Todas' });
 
   const [showGoalForm, setShowGoalForm] = useState(false);
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
@@ -782,6 +786,81 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {activeTab === 'admin-avisos' && (
         <div className="space-y-8 max-w-4xl mx-auto"><div className="bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm"><h3 className="text-2xl font-black text-primary uppercase mb-8 flex items-center gap-3"><Megaphone size={28} className="text-secondary" /> Enviar Comunicado</h3><div className="space-y-6"><div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Para quem?</label><select value={noticeForm.recipientId} onChange={e => setNoticeForm({ ...noticeForm, recipientId: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none"><option value="all">Todos os Líderes</option>{cells.map(c => <option key={c.id} value={c.id}>{c.leader} ({c.name})</option>)}</select></div><div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Título do Aviso</label><input type="text" placeholder="Ex: Reunião de Líderes Extra" value={noticeForm.title} onChange={e => setNoticeForm({ ...noticeForm, title: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div><div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Mensagem</label><textarea placeholder="Escreva aqui..." rows={4} value={noticeForm.message} onChange={e => setNoticeForm({ ...noticeForm, message: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-medium resize-none" /></div><div className="flex flex-col sm:flex-row gap-4 pt-4"><button onClick={handleSendAppNotice} className="flex-1 bg-primary text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-black transition-all flex items-center justify-center gap-2"><BellRing size={18} /> Notificar no App</button><button onClick={handleSendWhatsAppNotice} className="flex-1 bg-green-500 text-white py-5 rounded-2xl font-black uppercase text-xs tracking-widest hover:bg-green-600 transition-all flex items-center justify-center gap-2"><MessageCircle size={18} /> Enviar via WhatsApp</button></div></div></div></div>
+      )}
+      {activeTab === 'admin-eventos' && (
+        <div className="space-y-8 max-w-5xl mx-auto">
+          <h3 className="text-3xl font-black text-primary uppercase tracking-tighter px-4">Gerenciar Eventos</h3>
+
+          <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm mx-4">
+            <h4 className="text-xs font-black uppercase text-gray-400 mb-6 tracking-widest">Novo Evento</h4>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6">
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Título</label>
+                <input type="text" value={eventForm.title} onChange={e => setEventForm({ ...eventForm, title: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Data</label>
+                <input type="date" value={eventForm.date} onChange={e => setEventForm({ ...eventForm, date: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Local</label>
+                <input type="text" value={eventForm.location} onChange={e => setEventForm({ ...eventForm, location: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+              </div>
+              <div className="space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Público-Alvo (Tipo de Célula)</label>
+                <select value={eventForm.cellType} onChange={e => setEventForm({ ...eventForm, cellType: e.target.value as any })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none">
+                  <option value="Todas">Todas as Células</option>
+                  <option value="Adulto">Células Adultas</option>
+                  <option value="Jovem">Células Jovens</option>
+                  <option value="Juvenil">Células Juvenis</option>
+                </select>
+              </div>
+              <div className="md:col-span-2 space-y-1">
+                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Descrição</label>
+                <textarea rows={3} value={eventForm.description} onChange={e => setEventForm({ ...eventForm, description: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-medium" />
+              </div>
+            </div>
+            <button
+              onClick={() => {
+                if (!eventForm.title || !eventForm.date) return alert("Preencha título e data.");
+                onAddEvent(eventForm);
+                setEventForm({ title: '', description: '', date: '', location: '', cellType: 'Todas' });
+              }}
+              className="w-full py-4 bg-secondary text-primary rounded-2xl font-black uppercase text-xs shadow-lg shadow-secondary/20 flex items-center justify-center gap-2"
+            >
+              <Calendar size={18} /> Criar Evento
+            </button>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 px-4 pb-12">
+            {events.length === 0 ? (
+              <div className="col-span-full bg-white p-20 rounded-[3rem] text-center border-2 border-dashed border-gray-100">
+                <Calendar className="mx-auto text-gray-200 mb-4" size={48} />
+                <p className="text-gray-400 font-black uppercase text-[10px] tracking-widest">Nenhum evento agendado</p>
+              </div>
+            ) : (
+              events.map(event => (
+                <div key={event.id} className="bg-white p-6 rounded-[2rem] border border-gray-100 shadow-sm relative group hover:shadow-xl transition-all">
+                  <button onClick={() => onDeleteEvent(event.id)} className="absolute top-4 right-4 p-2 text-gray-300 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="bg-secondary/10 text-secondary p-3 rounded-2xl"><Calendar size={24} /></div>
+                    <div>
+                      <h4 className="font-black text-primary uppercase leading-tight">{event.title}</h4>
+                      <div className="flex items-center gap-2 mt-1">
+                        <span className="text-[9px] font-black text-gray-400 uppercase tracking-widest">{new Date(event.date + 'T12:00:00').toLocaleDateString()}</span>
+                        <span className={`text-[8px] font-black px-2 py-0.5 rounded-full ${event.cellType === 'Todas' ? 'bg-primary text-white' : 'bg-gray-100 text-gray-500'}`}>{event.cellType}</span>
+                      </div>
+                    </div>
+                  </div>
+                  <p className="text-xs text-gray-500 font-medium mb-4">{event.description}</p>
+                  <div className="flex items-center gap-1.5 text-xs font-bold text-primary">
+                    <MapPin size={14} className="text-secondary" /> {event.location || 'Local não definido'}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        </div>
       )}
     </div>
   );
