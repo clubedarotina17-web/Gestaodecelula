@@ -534,7 +534,7 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                       <div className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100"><p className="text-[8px] font-black text-indigo-600 uppercase">Visitas</p><p className="text-sm font-black">{report.weeklyVisits || 0}</p></div>
                       <div className="p-3 bg-green-50 rounded-2xl border border-green-100"><p className="text-[8px] font-black text-green-500 uppercase">Oferta</p><p className="text-sm font-black text-green-700">R${report.offering.toFixed(2)}</p></div>
                       <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p className="text-[8px] font-black text-blue-500 uppercase">Oferta Kids</p><p className="text-sm font-black text-blue-700">R${(report.kidsOffering || 0).toFixed(2)}</p></div>
-                      <div className="p-3 bg-primary text-white rounded-2xl"><p className="text-[7px] font-black uppercase opacity-60">Total Vidas</p><p className="text-base font-black">{report.attendance + report.visitors}</p></div>
+
                     </div>
 
                     {/* Detalhes dos Visitantes de 1ª Vez */}
@@ -545,18 +545,35 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                         </p>
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {report.firstTimeVisitorsList.map((v, i) => (
-                            <div key={i} className="bg-amber-50/50 border border-amber-100 p-3 rounded-2xl flex items-center justify-between group hover:bg-amber-50 transition-all">
-                              <div className="flex-1 min-w-0 pr-3">
-                                <p className="text-[11px] font-black text-primary uppercase truncate">{v.name}</p>
-                                <p className="text-[10px] text-gray-500 font-bold">{v.phone}</p>
+                            <div key={i} className="bg-amber-50 border border-amber-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col gap-3">
+                              <div className="flex justify-between items-start">
+                                <div className="min-w-0">
+                                  <p className="text-xs font-black text-primary uppercase truncate mb-1">{v.name}</p>
+                                  <a href={`https://wa.me/55${v.phone.replace(/\D/g, '')}`} target="_blank" className="text-[10px] text-green-600 font-black flex items-center gap-1 hover:underline">
+                                    <MessageCircle size={10} /> {v.phone}
+                                  </a>
+                                </div>
+                                <div className="flex flex-col gap-1 items-end shrink-0">
+                                  <span className={`text-[7px] font-black px-1.5 py-0.5 rounded border uppercase ${v.isBaptized ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                                    {v.isBaptized ? 'Batizado' : 'Não Batizado'}
+                                  </span>
+                                  <span className={`text-[7px] font-black px-1.5 py-0.5 rounded border uppercase ${v.hasAttendedEncounter ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                                    {v.hasAttendedEncounter ? 'Fez Encontro' : 'Não Fez Encontro'}
+                                  </span>
+                                </div>
                               </div>
-                              <button
-                                onClick={() => sendWhatsAppWelcome(v)}
-                                className="p-2 bg-green-500 text-white rounded-xl shadow-sm hover:scale-110 active:scale-95 transition-all"
-                                title="Enviar boas-vindas"
+                              <div className="pt-2 border-t border-amber-100/50">
+                                <p className="text-[9px] font-bold text-gray-500 flex items-start gap-1">
+                                  <MapPin size={10} className="mt-0.5 shrink-0" /> {v.address || 'Endereço não informado'}
+                                </p>
+                              </div>
+                              <a
+                                href={`https://wa.me/55${v.phone.replace(/\D/g, '')}`}
+                                target="_blank"
+                                className="mt-auto w-full py-2 bg-green-500 text-white rounded-xl font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-green-600 transition-colors shadow-sm shadow-green-500/20 active:scale-95"
                               >
-                                <MessageCircle size={14} />
-                              </button>
+                                <MessageCircle size={12} /> Chamar no WhatsApp
+                              </a>
                             </div>
                           ))}
                         </div>

@@ -479,41 +479,39 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <div className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100"><p className="text-[8px] font-black text-indigo-600 uppercase">Visitas</p><p className="text-sm font-black">{report.weeklyVisits || 0}</p></div>
                       <div className="p-3 bg-green-50 rounded-2xl border border-green-100"><p className="text-[8px] font-black text-green-500 uppercase">Oferta</p><p className="text-sm font-black text-green-700">R${report.offering.toFixed(2)}</p></div>
                       <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p className="text-[8px] font-black text-blue-500 uppercase">Oferta Kids</p><p className="text-sm font-black text-blue-700">R${(report.kidsOffering || 0).toFixed(2)}</p></div>
-                      <div className="p-3 bg-primary text-white rounded-2xl"><p className="text-[7px] font-black uppercase opacity-60">Total Vidas</p><p className="text-base font-black">{report.attendance + report.visitors}</p></div>
+
                     </div>
                     {report.firstTimeVisitorsList && report.firstTimeVisitorsList.length > 0 && (
                       <div className="pt-4 border-t border-gray-100">
                         <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-3 flex items-center gap-1"><Sparkles size={12} /> Detalhes dos Visitantes (1ª Vez)</p>
-                        <div className="flex flex-wrap gap-2">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
                           {report.firstTimeVisitorsList.map((v, i) => (
-                            <div key={i} className="bg-amber-50 border border-amber-100 p-4 rounded-2xl flex flex-col gap-3 shadow-sm hover:shadow-md transition-all">
+                            <div key={i} className="bg-amber-50 border border-amber-100 p-4 rounded-2xl shadow-sm hover:shadow-md transition-all flex flex-col gap-3">
                               <div className="flex justify-between items-start">
-                                <div>
-                                  <span className="text-xs font-black text-primary uppercase leading-none block mb-1">{v.name}</span>
-                                  <a href={`https://wa.me/55${v.phone.replace(/\D/g, '')}`} target="_blank" className="text-[10px] text-green-600 font-black uppercase tracking-tighter flex items-center gap-1 hover:underline">
+                                <div className="min-w-0">
+                                  <p className="text-xs font-black text-primary uppercase truncate mb-1">{v.name}</p>
+                                  <a href={`https://wa.me/55${v.phone.replace(/\D/g, '')}`} target="_blank" className="text-[10px] text-green-600 font-black flex items-center gap-1 hover:underline">
                                     <MessageCircle size={10} /> {v.phone}
                                   </a>
                                 </div>
-                                <div className="flex flex-col gap-1 items-end">
-                                  <span className={`text-[7px] font-black px-1.5 py-0.5 rounded border uppercase tracking-wide ${v.isBaptized ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                                <div className="flex flex-col gap-1 items-end shrink-0">
+                                  <span className={`text-[7px] font-black px-1.5 py-0.5 rounded border uppercase ${v.isBaptized ? 'bg-green-100 text-green-700 border-green-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
                                     {v.isBaptized ? 'Batizado' : 'Não Batizado'}
                                   </span>
-                                  <span className={`text-[7px] font-black px-1.5 py-0.5 rounded border uppercase tracking-wide ${v.hasAttendedEncounter ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
+                                  <span className={`text-[7px] font-black px-1.5 py-0.5 rounded border uppercase ${v.hasAttendedEncounter ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
                                     {v.hasAttendedEncounter ? 'Fez Encontro' : 'Não Fez Encontro'}
                                   </span>
                                 </div>
                               </div>
-
                               <div className="pt-2 border-t border-amber-100/50">
-                                <p className="text-[9px] font-bold text-gray-500 uppercase tracking-tight flex items-start gap-1">
+                                <p className="text-[9px] font-bold text-gray-500 flex items-start gap-1">
                                   <MapPin size={10} className="mt-0.5 shrink-0" /> {v.address || 'Endereço não informado'}
                                 </p>
                               </div>
-
                               <a
                                 href={`https://wa.me/55${v.phone.replace(/\D/g, '')}`}
                                 target="_blank"
-                                className="mt-1 w-full py-2 bg-green-500 text-white rounded-xl font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-green-600 transition-colors shadow-sm shadow-green-500/20 active:scale-95"
+                                className="mt-auto w-full py-2 bg-green-500 text-white rounded-xl font-black text-[9px] uppercase tracking-widest flex items-center justify-center gap-2 hover:bg-green-600 transition-colors shadow-sm shadow-green-500/20 active:scale-95"
                               >
                                 <MessageCircle size={12} /> Chamar no WhatsApp
                               </a>
