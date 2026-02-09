@@ -352,7 +352,7 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                                     {visitor.isBaptized ? 'BATIZADO' : 'NÃO BATIZADO'}
                                   </span>
                                   <span className={`text-[8px] font-black px-2 py-0.5 rounded shadow-sm border ${visitor.hasAttendedEncounter ? 'bg-indigo-500 text-white border-indigo-600' : 'bg-gray-400 text-white border-gray-500'}`}>
-                                    {visitor.hasAttendedEncounter ? 'FEZ O ENCONTRO' : 'NÃO FEZ O ENCONTRO'}
+                                    {visitor.hasAttendedEncounter ? 'FOI AO ENCONTRO' : 'NÃO FOI AO ENCONTRO'}
                                   </span>
                                 </div>
                               </div>
@@ -559,7 +559,7 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                                     {v.isBaptized ? 'Batizado' : 'Não Batizado'}
                                   </span>
                                   <span className={`text-[7px] font-black px-1.5 py-0.5 rounded border uppercase ${v.hasAttendedEncounter ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
-                                    {v.hasAttendedEncounter ? 'Fez Encontro' : 'Não Fez Encontro'}
+                                    {v.hasAttendedEncounter ? 'Foi ao Encontro' : 'Não Foi ao Encontro'}
                                   </span>
                                 </div>
                               </div>

@@ -249,7 +249,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const recurrentVisitors = Math.max(0, totals.visitors - totals.firstTime);
     const visitorProfileData = [{ name: 'Visitantes 1ª Vez', value: totals.firstTime }, { name: 'Recorrentes', value: recurrentVisitors }];
     const baptizedPieData = [{ name: 'Batizados', value: baptizedCount }, { name: 'Não Batizados', value: notBaptizedCount }];
-    const encounterPieData = [{ name: 'Fez Encontro', value: encounterYesCount }, { name: 'Não Fez', value: encounterNoCount }];
+    const encounterPieData = [{ name: 'Foi ao Encontro', value: encounterYesCount }, { name: 'Não Foi', value: encounterNoCount }];
 
     const cellReports: Record<string, Report[]> = {};
     filteredReports.forEach(r => {
@@ -503,7 +503,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                                     {v.isBaptized ? 'Batizado' : 'Não Batizado'}
                                   </span>
                                   <span className={`text-[7px] font-black px-1.5 py-0.5 rounded border uppercase ${v.hasAttendedEncounter ? 'bg-indigo-100 text-indigo-700 border-indigo-200' : 'bg-gray-100 text-gray-500 border-gray-200'}`}>
-                                    {v.hasAttendedEncounter ? 'Fez Encontro' : 'Não Fez Encontro'}
+                                    {v.hasAttendedEncounter ? 'Foi ao Encontro' : 'Não Foi ao Encontro'}
                                   </span>
                                 </div>
                               </div>
