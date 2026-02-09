@@ -226,6 +226,7 @@ const App: React.FC = () => {
     setReports(prev => [newReport, ...prev]);
 
     const { data } = await supabase.from('reports').insert([{
+      id: tempId,
       cell_id: newReportData.cellId, cell_name: newReportData.cellName, date: newReportData.date,
       attendance: newReportData.attendance, visitors: newReportData.visitors, conversions: newReportData.conversions,
       weekly_visits: newReportData.weeklyVisits, first_time_visitors_count: newReportData.firstTimeVisitorsCount,
@@ -266,6 +267,7 @@ const App: React.FC = () => {
     setGoals(prev => [...prev, newGoal]);
 
     await supabase.from('goals').insert([{
+      id: tempId,
       name: newGoalData.name, start_date: newGoalData.startDate, end_date: newGoalData.endDate,
       objective: newGoalData.objective, cell_type: newGoalData.cellType, cell_id: newGoalData.cellId,
       report: newGoalData.report, is_completed: newGoalData.isCompleted
@@ -308,7 +310,13 @@ const App: React.FC = () => {
     const tempId = Math.random().toString(36).substr(2, 9);
     const newShare = { ...newShareData, id: tempId };
     setShares(prev => [newShare, ...prev]);
-    await supabase.from('shares').insert([newShareData]);
+    await supabase.from('shares').insert([{
+      id: tempId,
+      title: newShareData.title,
+      description: newShareData.description,
+      date: newShareData.date,
+      file_url: newShareData.fileUrl
+    }]);
   };
 
   const handleDeleteShare = async (id: string) => {
@@ -320,7 +328,13 @@ const App: React.FC = () => {
     const tempId = Math.random().toString(36).substr(2, 9);
     const newBaptism = { ...newBaptismData, id: tempId };
     setBaptisms(prev => [...prev, newBaptism]);
-    await supabase.from('baptisms').insert([newBaptismData]);
+    await supabase.from('baptisms').insert([{
+      id: tempId,
+      name: newBaptismData.name,
+      whatsapp: newBaptismData.whatsapp,
+      date: newBaptismData.date,
+      cell_name: newBaptismData.cellName
+    }]);
   };
 
   const handleAddEvent = async (newEventData: Omit<AppEvent, 'id'>) => {
