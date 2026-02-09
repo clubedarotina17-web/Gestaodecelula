@@ -241,7 +241,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     });
 
     const totalPeople = totals.adults + totals.visitors;
-    const comparisonData = [{ name: 'Presença', Adultos: totals.adults, Visitantes: totals.visitors, '1ª Vez': totals.firstTime }];
+    const comparisonData = [{ name: 'Presença', 'Total Presentes': totals.adults, Visitantes: totals.visitors, '1ª Vez': totals.firstTime }];
     const recurrentVisitors = Math.max(0, totals.visitors - totals.firstTime);
     const visitorProfileData = [{ name: 'Visitantes 1ª Vez', value: totals.firstTime }, { name: 'Recorrentes', value: recurrentVisitors }];
     const baptizedPieData = [{ name: 'Batizados', value: baptizedCount }, { name: 'Não Batizados', value: notBaptizedCount }];
@@ -471,7 +471,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <div className="p-6 space-y-6">
                     <p className="text-sm text-gray-600 font-bold italic border-l-4 border-secondary/20 pl-4">"{report.summary || 'Sem resumo.'}"</p>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3">
-                      <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Adultos</p><p className="text-sm font-black">{report.attendance}</p></div>
+                      <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Total Presentes</p><p className="text-sm font-black">{report.attendance}</p></div>
                       <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Visitantes</p><p className="text-sm font-black">{report.visitors}</p></div>
                       <div className="p-3 bg-amber-50 rounded-2xl border border-amber-100"><p className="text-[8px] font-black text-amber-600 uppercase">1ª Vez</p><p className="text-sm font-black">{report.firstTimeVisitorsCount || 0}</p></div>
                       <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p className="text-[8px] font-black text-blue-500 uppercase">Crianças</p><p className="text-sm font-black">{report.childrenCount || 0}</p></div>
@@ -626,7 +626,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             </div>
           </div>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="bg-white p-6 rounded-[2rem] border border-gray-50 shadow-sm hover:shadow-md transition-shadow"><div className="flex items-center gap-2 mb-2 text-primary opacity-60"><Users size={16} /><p className="text-[9px] font-black uppercase tracking-widest">Adultos</p></div><p className="text-4xl font-black text-primary tracking-tighter">{metricsData.totals.adults}</p></div>
+            <div className="bg-white p-6 rounded-[2rem] border border-gray-50 shadow-sm hover:shadow-md transition-shadow"><div className="flex items-center gap-2 mb-2 text-primary opacity-60"><Users size={16} /><p className="text-[9px] font-black uppercase tracking-widest">Total Presentes</p></div><p className="text-4xl font-black text-primary tracking-tighter">{metricsData.totals.adults}</p></div>
             <div className="bg-white p-6 rounded-[2rem] border border-gray-50 shadow-sm hover:shadow-md transition-shadow"><div className="flex items-center gap-2 mb-2 text-secondary"><Users size={16} /><p className="text-[9px] font-black uppercase tracking-widest">Visitantes</p></div><p className="text-4xl font-black text-secondary tracking-tighter">{metricsData.totals.visitors}</p></div>
             <div className="bg-white p-6 rounded-[2rem] border border-gray-50 shadow-sm hover:shadow-md transition-shadow"><div className="flex items-center gap-2 mb-2 text-amber-500"><Sparkles size={16} /><p className="text-[9px] font-black uppercase tracking-widest">Visitantes 1ª Vez</p></div><p className="text-4xl font-black text-amber-500 tracking-tighter">{metricsData.totals.firstTime}</p></div>
             <div className="bg-white p-6 rounded-[2rem] border border-gray-50 shadow-sm hover:shadow-md transition-shadow"><div className="flex items-center gap-2 mb-2 text-red-500"><Heart size={16} /><p className="text-[9px] font-black uppercase tracking-widest">Conversões</p></div><p className="text-4xl font-black text-red-500 tracking-tighter">{metricsData.totals.conversions}</p></div>
@@ -636,7 +636,29 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="bg-primary p-6 rounded-[2rem] text-white shadow-xl shadow-black/20 group hover:scale-[1.02] transition-transform"><div className="flex items-center gap-2 mb-2 text-secondary"><Landmark size={16} /><p className="text-[9px] font-black uppercase tracking-widest">Ofertas Kids</p></div><p className="text-2xl font-black tracking-tighter">R$ {metricsData.totals.offeringKids.toFixed(2)}</p></div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            <div className="bg-white p-6 md:p-8 rounded-[3rem] border border-gray-100 shadow-sm"><div className="flex items-center justify-between mb-8"><h4 className="text-xs font-black uppercase text-gray-400 tracking-widest">Presença Consolidada (%)</h4><div className="text-[10px] font-black text-primary">Total: {metricsData.totalPeople} vidas</div></div><div className="h-64 md:h-80 w-full"><ResponsiveContainer width="100%" height="100%"><ComposedChart data={metricsData.comparisonData} layout="vertical"><CartesianGrid strokeDasharray="3 3" horizontal={false} stroke="#f0f0f0" /><XAxis type="number" hide /><YAxis dataKey="name" type="category" hide /><Tooltip cursor={{ fill: 'transparent' }} contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }} /><Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} verticalAlign="bottom" align="center" /><Bar dataKey="Adultos" stackId="a" fill="#000000" barSize={40} radius={[0, 0, 0, 0]} /><Bar dataKey="Visitantes" stackId="a" fill="#00b4bc" radius={[0, 0, 0, 0]} /><Bar dataKey="1ª Vez" stackId="a" fill="#f59e0b" radius={[0, 10, 10, 0]} /></ComposedChart></ResponsiveContainer></div></div>
+            <div className="bg-white p-6 md:p-8 rounded-[3rem] border border-gray-100 shadow-sm">
+              <div className="flex items-center justify-between mb-8">
+                <h4 className="text-xs font-black uppercase text-gray-400 tracking-widest">Presença Consolidada</h4>
+                <div className="text-[10px] font-black text-primary">Total: {metricsData.totalPeople} vidas</div>
+              </div>
+              <div className="h-64 md:h-80 w-full">
+                <ResponsiveContainer width="100%" height="100%">
+                  <BarChart data={metricsData.comparisonData} margin={{ top: 20, right: 30, left: 20, bottom: 5 }}>
+                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                    <XAxis dataKey="name" hide />
+                    <YAxis hide />
+                    <Tooltip
+                      cursor={{ fill: 'transparent' }}
+                      contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}
+                    />
+                    <Legend iconType="circle" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase' }} verticalAlign="bottom" align="center" />
+                    <Bar dataKey="1ª Vez" fill="#f59e0b" radius={[10, 10, 0, 0]} barSize={40} />
+                    <Bar dataKey="Total Presentes" fill="#000000" radius={[10, 10, 0, 0]} barSize={40} />
+                    <Bar dataKey="Visitantes" fill="#00b4bc" radius={[10, 10, 0, 0]} barSize={40} />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
             <div className="bg-white p-6 md:p-8 rounded-[3rem] border border-gray-100 shadow-sm"><h4 className="text-xs font-black uppercase text-gray-400 mb-8 tracking-widest">Perfil de Visitantes</h4><div className="h-64 md:h-80 w-full"><ResponsiveContainer width="100%" height="100%"><RePieChart><Pie data={metricsData.visitorProfileData} cx="50%" cy="50%" innerRadius={50} outerRadius={85} paddingAngle={5} dataKey="value">{metricsData.visitorProfileData.map((entry, index) => <ReCell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />)}</Pie><Tooltip contentStyle={{ borderRadius: '16px', border: 'none' }} /><Legend iconType="circle" layout="horizontal" align="center" verticalAlign="bottom" wrapperStyle={{ fontSize: '10px', fontWeight: 'bold', textTransform: 'uppercase', paddingTop: '20px' }} /></RePieChart></ResponsiveContainer></div></div>
           </div>
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

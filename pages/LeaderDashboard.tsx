@@ -318,7 +318,7 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                   />
                 </div>
                 <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-gray-700 ml-1">{isJovemOuJuvenil ? 'Presentes' : 'Adultos'}</label>
+                  <label className="text-[11px] font-bold text-gray-700 ml-1">Total Presentes</label>
                   <input type="number" required placeholder="0" value={formData.attendance} onChange={(e) => setFormData({ ...formData, attendance: e.target.value })} className="w-full p-3.5 bg-gray-50 border border-gray-50 rounded-xl outline-none focus:border-secondary text-sm font-bold" />
                 </div>
                 <div className="space-y-1">
@@ -526,7 +526,7 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                   <div className="p-6 space-y-6">
                     <p className="text-sm text-gray-600 font-bold italic border-l-4 border-secondary/20 pl-4">"{report.summary || 'Sem resumo.'}"</p>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3">
-                      <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Adultos</p><p className="text-sm font-black">{report.attendance}</p></div>
+                      <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Total Presentes</p><p className="text-sm font-black">{report.attendance}</p></div>
                       <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Visitantes</p><p className="text-sm font-black">{report.visitors}</p></div>
                       <div className="p-3 bg-amber-50 rounded-2xl border border-amber-100"><p className="text-[8px] font-black text-amber-600 uppercase">1ª Vez</p><p className="text-sm font-black">{report.firstTimeVisitorsCount || 0}</p></div>
                       <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p className="text-[8px] font-black text-blue-500 uppercase">Crianças</p><p className="text-sm font-black">{report.childrenCount || 0}</p></div>
