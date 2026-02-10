@@ -151,10 +151,12 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       'Quinta-Feira': 4, 'Sexta-Feira': 5, 'Sábado': 6
     };
 
-    return (cells || []).filter(cell => {
+    const results: { cell: CellTypeData, dateStr: string }[] = [];
+
+    (cells || []).forEach(cell => {
       const cellDayName = cell.day.split(' ')[0].trim();
       const meetingDayIndex = dayMap[cellDayName];
-      if (meetingDayIndex === undefined) return false;
+      if (meetingDayIndex === undefined) return;
 
       const lastMeetingDate = new Date(today);
       let diff = today.getDay() - meetingDayIndex;
@@ -169,42 +171,23 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       if (isOver24h) {
         const dateStr = getLocalDateString(lastMeetingDate);
-
-        // Se já foi ignorado para ESTA data específica, não mostrar
-        if (cell.dismissedLateDate === dateStr) return false;
-
+        if (cell.dismissedLateDate === dateStr) return;
         const hasReport = (reports || []).some(r => r.cellId === cell.id && r.date === dateStr);
-        return !hasReport;
+        if (!hasReport) results.push({ cell, dateStr });
       }
-      return false;
     });
+
+    return results;
   }, [cells, reports]);
 
-  const handleChargeLeader = (cell: CellTypeData) => {
-    if (!cell.phone) return alert("Esta célula não possui telefone cadastrado.");
+  const handleChargeLeader = (cell: CellTypeData, dateStr?: string) => {
     const cleanPhone = cell.phone.replace(/\D/g, '');
-    const message = `Olá líder ${cell.leader}, notamos que o relatório da Célula ${cell.name} referente ao último encontro ainda não foi enviado no aplicativo. Poderia nos enviar assim que possível? Obrigado!`;
+    const dateFormatted = dateStr ? new Date(dateStr + 'T12:00:00').toLocaleDateString() : '';
+    const message = `Olá líder! Percebemos que sua célula de ${cell.day} ${dateFormatted ? `(dia ${dateFormatted})` : ''} ainda não possui relatório cadastrado. Tudo bem por aí?`;
     window.open(`https://wa.me/55${cleanPhone}?text=${encodeURIComponent(message)}`, '_blank');
   };
 
-  const handleDismissLateAlertInternal = (cellId: string) => {
-    // Pegar a data que gerou o alerta para persistir
-    const dayMap: { [key: string]: number } = {
-      'Domingo': 0, 'Segunda-Feira': 1, 'Terça-Feira': 2, 'Quarta-Feira': 3,
-      'Quinta-Feira': 4, 'Sexta-Feira': 5, 'Sábado': 6
-    };
-    const cell = cells.find(c => c.id === cellId);
-    if (!cell) return;
-
-    const cellDayName = cell.day.split(' ')[0].trim();
-    const meetingDayIndex = dayMap[cellDayName];
-    const today = new Date();
-    const lastMeetingDate = new Date(today);
-    let diff = today.getDay() - meetingDayIndex;
-    if (diff < 0) diff += 7;
-    lastMeetingDate.setDate(today.getDate() - diff);
-    const dateStr = getLocalDateString(lastMeetingDate);
-
+  const handleDismissLateAlertInternal = (cellId: string, dateStr: string) => {
     onDismissLateAlert(cellId, dateStr);
   };
 
@@ -446,17 +429,17 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="space-y-4 px-2 animate-in slide-in-from-left duration-500">
               <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] flex items-center gap-2 ml-1"><AlertCircle size={14} /> Pendências Identificadas (Atrasos &gt; 24h)</h4>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {lateReportsList.map(cell => (
-                  <div key={`late-${cell.id}`} className="bg-white border-2 border-amber-100 p-4 md:p-5 rounded-[2rem] flex flex-row items-center justify-between shadow-xl shadow-amber-500/5 group">
+                {lateReportsList.map(item => (
+                  <div key={`late-${item.cell.id}`} className="bg-white border-2 border-amber-100 p-4 md:p-5 rounded-[2rem] flex flex-row items-center justify-between shadow-xl shadow-amber-500/5 group">
                     <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0 pr-2">
                       <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><Clock className="w-5 h-5 md:w-6 md:h-6" /></div>
                       <div className="min-w-0">
-                        <p className="font-black text-primary text-[10px] md:text-xs uppercase leading-tight">Relatório pendente (Atrasado) - Célula: {cell.name} - {cell.day} e {cell.time}</p>
+                        <p className="font-black text-primary text-[10px] md:text-xs uppercase leading-tight">Relatório pendente (Atrasado) de {new Date(item.dateStr + 'T12:00:00').toLocaleDateString()} - Célula: {item.cell.name} - {item.cell.day} e {item.cell.time}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
-                      <button onClick={() => handleChargeLeader(cell)} className="p-2.5 md:p-3 bg-green-500 text-white rounded-xl md:rounded-2xl hover:bg-green-600 transition-all shadow-md shadow-green-500/20 active:scale-95"><MessageCircle className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
-                      <button onClick={() => handleDismissLateAlertInternal(cell.id)} className="p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl md:rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"><X className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
+                      <button onClick={() => handleChargeLeader(item.cell, item.dateStr)} className="p-2.5 md:p-3 bg-green-500 text-white rounded-xl md:rounded-2xl hover:bg-green-600 transition-all shadow-md shadow-green-500/20 active:scale-95"><MessageCircle className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
+                      <button onClick={() => handleDismissLateAlertInternal(item.cell.id, item.dateStr)} className="p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl md:rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"><X className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
                     </div>
                   </div>
                 ))}
