@@ -229,6 +229,11 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
       alert("Por favor, salve todos os visitantes.");
       return;
     }
+
+    if (Number(formData.visitors) < Number(formData.firstTimeVisitorsCount)) {
+      alert(`Erro: O número total de visitantes (${formData.visitors}) não pode ser menor que o número de visitantes de 1ª vez (${formData.firstTimeVisitorsCount}).`);
+      return;
+    }
     const selectedDay = getDayOfWeek(formData.date);
     const cellMeetingDay = cell.day.split(' – ')[0].trim();
     const isLate = selectedDay.toLowerCase() !== cellMeetingDay.toLowerCase();
