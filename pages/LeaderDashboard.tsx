@@ -32,6 +32,44 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
     return `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`;
   };
 
+  const getLocalDateString = (date: Date) => {
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}-${month}-${day}`;
+  };
+
+  const lateReportDate = useMemo(() => {
+    const today = new Date();
+    const dayMap: { [key: string]: number } = {
+      'Domingo': 0, 'Segunda-Feira': 1, 'Terça-Feira': 2, 'Quarta-Feira': 3,
+      'Quinta-Feira': 4, 'Sexta-Feira': 5, 'Sábado': 6
+    };
+
+    const cellDayName = cell.day.split(' ')[0].trim();
+    const meetingDayIndex = dayMap[cellDayName];
+    if (meetingDayIndex === undefined) return null;
+
+    const lastMeetingDate = new Date(today);
+    let diff = today.getDay() - meetingDayIndex;
+    if (diff < 0) diff += 7;
+    lastMeetingDate.setDate(today.getDate() - diff);
+
+    const [hours, minutes] = (cell.time || '20:00').split(':').map(Number);
+    lastMeetingDate.setHours(hours, minutes, 0, 0);
+
+    const timeSinceMeeting = today.getTime() - lastMeetingDate.getTime();
+    const isOver24h = timeSinceMeeting >= (24 * 60 * 60 * 1000);
+
+    if (isOver24h) {
+      const dateStr = getLocalDateString(lastMeetingDate);
+      if (cell.dismissedLateDate === dateStr) return null;
+      const hasReport = (reports || []).some(r => r.cellId === cell.id && r.date === dateStr);
+      if (!hasReport) return dateStr;
+    }
+    return null;
+  }, [cell, reports]);
+
   const [formData, setFormData] = useState({
     date: getLocalDate(),
     attendance: '',
@@ -291,6 +329,23 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
       {activeTab === 'cadastrar' && (
         <div className="space-y-4">
           <div className="bg-white rounded-3xl p-5 md:p-7 shadow-sm">
+            {lateReportDate && (
+              <div className="mb-6 bg-amber-50 border-2 border-amber-100 p-5 rounded-[2rem] flex items-center gap-4 animate-in slide-in-from-top-4 duration-500 shadow-xl shadow-amber-500/5">
+                <div className="w-12 h-12 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center shrink-0">
+                  <Clock className="w-6 h-6" />
+                </div>
+                <div className="flex-1">
+                  <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] mb-1">Atenção: Relatório Pendente (Atrasado)</h4>
+                  <p className="text-primary font-black text-xs uppercase leading-tight">Você ainda não enviou o relatório da última reunião ({new Date(lateReportDate + 'T12:00:00').toLocaleDateString()}).</p>
+                </div>
+                <button
+                  onClick={() => setFormData({ ...formData, date: lateReportDate })}
+                  className="px-4 py-2 bg-amber-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-amber-700 transition-all active:scale-95 shadow-md shadow-amber-600/20"
+                >
+                  Preencher
+                </button>
+              </div>
+            )}
             <div className="flex items-center justify-between mb-5 border-b border-gray-50 pb-4">
               <div>
                 <h3 className="text-xl font-black text-primary flex items-center gap-2">
