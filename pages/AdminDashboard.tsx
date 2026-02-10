@@ -255,18 +255,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       let color = 'text-green-500';
       let bgColor = 'bg-green-50';
 
-      if (avgVisitors <= 0) {
+      if (weeksWithoutVisitors >= 2) {
+        level = 'Atenção';
+        label = 'Precisa de atenção';
+        reason = `Célula há ${weeksWithoutVisitors} relatórios consecutivos sem visitantes. Requer atenção.`;
+        color = 'text-amber-500';
+        bgColor = 'bg-amber-50';
+      } else if (avgVisitors <= 0) {
         level = 'Crítico';
         label = 'Acompanhar';
         reason = `Célula sem média de visitantes no período selecionado. Precisa de acompanhamento.`;
         color = 'text-red-500';
         bgColor = 'bg-red-50';
-      } else if (weeksWithoutVisitors >= 2) {
-        level = 'Atenção';
-        label = 'Ter atenção';
-        reason = `Célula há ${weeksWithoutVisitors} relatórios consecutivos sem visitantes. Requer atenção.`;
-        color = 'text-amber-500';
-        bgColor = 'bg-amber-50';
       }
       return { name, level, label, reason, color, bgColor, avgVisitors, avgAttendance };
     }).sort((a, b) => {
