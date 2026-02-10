@@ -263,19 +263,28 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       for (const report of reportsList) {
         if (report.visitors === 0) weeksWithoutVisitors++; else break;
       }
+      const avgVisitors = reportsList.reduce((a, b) => a + b.visitors, 0) / reportsList.length;
+      const avgAttendance = reportsList.reduce((a, b) => a + b.attendance, 0) / reportsList.length;
+
       let level: 'Normal' | 'Atenção' | 'Crítico' = 'Normal';
       let label = 'Tudo OK';
       let reason = 'Célula com visitantes regulares. Tudo OK.';
       let color = 'text-green-500';
       let bgColor = 'bg-green-50';
 
-      if (weeksWithoutVisitors >= 3) {
-        level = 'Crítico'; label = 'Acompanhamento'; reason = `Célula há ${weeksWithoutVisitors} semanas consecutivas sem visitantes. Precisa de acompanhamento urgente.`; color = 'text-red-500'; bgColor = 'bg-red-50';
-      } else if (weeksWithoutVisitors === 2) {
-        level = 'Atenção'; label = 'Atenção'; reason = 'Célula há 2 semanas sem visitantes. Precisa de atenção do supervisor.'; color = 'text-amber-500'; bgColor = 'bg-amber-50';
+      if (avgVisitors <= 0) {
+        level = 'Crítico';
+        label = 'Acompanhar';
+        reason = `Célula sem média de visitantes no período selecionado. Precisa de acompanhamento.`;
+        color = 'text-red-500';
+        bgColor = 'bg-red-50';
+      } else if (weeksWithoutVisitors >= 2) {
+        level = 'Atenção';
+        label = 'Ter atenção';
+        reason = `Célula há ${weeksWithoutVisitors} relatórios consecutivos sem visitantes. Requer atenção.`;
+        color = 'text-amber-500';
+        bgColor = 'bg-amber-50';
       }
-      const avgVisitors = reportsList.reduce((a, b) => a + b.visitors, 0) / reportsList.length;
-      const avgAttendance = reportsList.reduce((a, b) => a + b.attendance, 0) / reportsList.length;
       return { name, level, label, reason, color, bgColor, avgVisitors, avgAttendance };
     }).sort((a, b) => {
       const order = { 'Crítico': 0, 'Atenção': 1, 'Normal': 2 };
