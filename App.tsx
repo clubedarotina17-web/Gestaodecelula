@@ -1,6 +1,4 @@
 
-console.log('🚀 [App.tsx] Arquivo carregado!');
-
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
 import Login from './pages/Login';
@@ -8,14 +6,10 @@ import Layout from './components/Layout';
 import LeaderDashboard from './pages/LeaderDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import CellConfirmation from './pages/CellConfirmation';
-import { DebugOverlay } from './components/DebugOverlay';
 import { UserRole, Cell, Report, Share, Baptism, AppNotification, Goal, AppEvent } from './types';
 import { INITIAL_CELLS } from './constants';
 
-console.log('🚀 [App.tsx] Imports concluídos');
-
 const App: React.FC = () => {
-  console.log('🚀 [App.tsx] Componente App iniciando...');
   // Estados inicializados vazios - dados vêm do Supabase via fetchData()
   // Removido localStorage para evitar QuotaExceededError no iOS Safari
   const [cells, setCells] = useState<Cell[]>(INITIAL_CELLS);
@@ -420,8 +414,6 @@ const App: React.FC = () => {
       ) : (
         <LeaderDashboard cell={authState.cell!} reports={reports} shares={shares} events={events} activeTab={activeTab} setActiveTab={setActiveTab} onAddReport={handleAddReport} onUpdateReport={handleUpdateReport} onDeleteReport={handleDeleteReport} onNotify={addNotification} />
       )}
-      {/* Debug overlay para iOS - mostra logs na tela */}
-      <DebugOverlay />
     </Layout>
   );
 };
