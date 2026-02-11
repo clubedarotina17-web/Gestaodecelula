@@ -11,44 +11,21 @@ import { DebugOverlay } from './components/DebugOverlay';
 import { UserRole, Cell, Report, Share, Baptism, AppNotification, Goal, AppEvent } from './types';
 import { INITIAL_CELLS } from './constants';
 
+
 const App: React.FC = () => {
-  // Inicialização de estados com LocalStorage para persistência imediata
-  const [cells, setCells] = useState<Cell[]>(() => {
-    const saved = localStorage.getItem('viver_em_cristo_cells');
-    return saved ? JSON.parse(saved) : INITIAL_CELLS;
-  });
-
-  const [reports, setReports] = useState<Report[]>(() => {
-    const saved = localStorage.getItem('viver_em_cristo_reports');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [shares, setShares] = useState<Share[]>(() => {
-    const saved = localStorage.getItem('viver_em_cristo_shares');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [baptisms, setBaptisms] = useState<Baptism[]>(() => {
-    const saved = localStorage.getItem('viver_em_cristo_baptisms');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [goals, setGoals] = useState<Goal[]>(() => {
-    const saved = localStorage.getItem('viver_em_cristo_goals');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [events, setEvents] = useState<AppEvent[]>(() => {
-    const saved = localStorage.getItem('viver_em_cristo_events');
-    return saved ? JSON.parse(saved) : [];
-  });
-
-  const [notifications, setNotifications] = useState<AppNotification[]>(() => {
-    const saved = localStorage.getItem('viver_em_cristo_notifications');
-    return saved ? JSON.parse(saved) : [];
-  });
+  // Estados inicializados vazios - dados vêm do Supabase via fetchData()
+  // Removido localStorage para evitar QuotaExceededError no iOS Safari
+  const [cells, setCells] = useState<Cell[]>(INITIAL_CELLS);
+  const [reports, setReports] = useState<Report[]>([]);
+  const [shares, setShares] = useState<Share[]>([]);
+  const [baptisms, setBaptisms] = useState<Baptism[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [events, setEvents] = useState<AppEvent[]>([]);
+  const [notifications, setNotifications] = useState<AppNotification[]>([]);
 
   const [loading, setLoading] = useState(true);
+
+  // Apenas autenticação fica no localStorage (pequeno, ~1KB)
   const [authState, setAuthState] = useState<{
     role: UserRole;
     cell: Cell | null;
@@ -82,16 +59,10 @@ const App: React.FC = () => {
     return 'cadastrar';
   });
 
-  // Persistir no LocalStorage sempre que houver mudanças
-  useEffect(() => {
-    localStorage.setItem('viver_em_cristo_cells', JSON.stringify(cells));
-    localStorage.setItem('viver_em_cristo_reports', JSON.stringify(reports));
-    localStorage.setItem('viver_em_cristo_shares', JSON.stringify(shares));
-    localStorage.setItem('viver_em_cristo_baptisms', JSON.stringify(baptisms));
-    localStorage.setItem('viver_em_cristo_goals', JSON.stringify(goals));
-    localStorage.setItem('viver_em_cristo_events', JSON.stringify(events));
-    localStorage.setItem('viver_em_cristo_notifications', JSON.stringify(notifications));
-  }, [cells, reports, shares, baptisms, goals, events, notifications]);
+
+  // REMOVIDO: Persistência no localStorage (causava QuotaExceededError no iOS)
+  // Dados agora vêm APENAS do Supabase - fonte única de verdade
+  // localStorage usado APENAS para autenticação (< 1KB)
 
   const fetchData = async () => {
     // Debug para iOS
@@ -210,7 +181,12 @@ const App: React.FC = () => {
     const newState = { role, cell, isAuthenticated: true, isConfirmed: role === 'admin' };
     setAuthState(newState);
     if (rememberMe) {
-      localStorage.setItem('viver_em_cristo_auth', JSON.stringify(newState));
+      try {
+        localStorage.setItem('viver_em_cristo_auth', JSON.stringify(newState));
+      } catch (e) {
+        // QuotaExceededError - continua funcionando sem salvar sessão
+        console.warn('Não foi possível salvar sessão no localStorage:', e);
+      }
     }
     setActiveTab(role === 'admin' ? 'admin-relatorios' : 'cadastrar');
   };
