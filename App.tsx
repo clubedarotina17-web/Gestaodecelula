@@ -7,6 +7,7 @@ import Layout from './components/Layout';
 import LeaderDashboard from './pages/LeaderDashboard';
 import AdminDashboard from './pages/AdminDashboard';
 import CellConfirmation from './pages/CellConfirmation';
+import { DebugOverlay } from './components/DebugOverlay';
 import { UserRole, Cell, Report, Share, Baptism, AppNotification, Goal, AppEvent } from './types';
 import { INITIAL_CELLS } from './constants';
 
@@ -440,6 +441,8 @@ const App: React.FC = () => {
       ) : (
         <LeaderDashboard cell={authState.cell!} reports={reports} shares={shares} events={events} activeTab={activeTab} setActiveTab={setActiveTab} onAddReport={handleAddReport} onUpdateReport={handleUpdateReport} onDeleteReport={handleDeleteReport} onNotify={addNotification} />
       )}
+      {/* Debug overlay para iOS - mostra logs na tela */}
+      <DebugOverlay />
     </Layout>
   );
 };
