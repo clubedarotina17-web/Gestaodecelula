@@ -50,6 +50,109 @@
 </head>
   <body>
     <div id="root"></div>
+    
+    <!-- CAPTURA DE ERROS CRÍTICOS PARA iOS - ANTES DO REACT -->
+    <script>
+      // Array para armazenar erros
+      window.__errors = [];
+      window.__logs = [];
+      
+      // Capturar erros não tratados
+      window.addEventListener('error', function(e) {
+        window.__errors.push({
+          type: 'error',
+          message: e.message,
+          filename: e.filename,
+          lineno: e.lineno,
+          colno: e.colno,
+          stack: e.error ? e.error.stack : 'No stack'
+        });
+        showErrorOverlay();
+        return false;
+      });
+      
+      // Capturar promise rejections
+      window.addEventListener('unhandledrejection', function(e) {
+        window.__errors.push({
+          type: 'promise',
+          message: e.reason ? e.reason.toString() : 'Promise rejection',
+          stack: e.reason ? e.reason.stack : 'No stack'
+        });
+        showErrorOverlay();
+      });
+      
+      // Interceptar console
+      const originalLog = console.log;
+      const originalError = console.error;
+      const originalWarn = console.warn;
+      
+      console.log = function(...args) {
+        window.__logs.push({ type: 'log', message: args.join(' '), time: new Date().toLocaleTimeString() });
+        originalLog.apply(console, args);
+      };
+      
+      console.error = function(...args) {
+        window.__errors.push({ type: 'console.error', message: args.join(' '), time: new Date().toLocaleTimeString() });
+        originalError.apply(console, args);
+        showErrorOverlay();
+      };
+      
+      console.warn = function(...args) {
+        window.__logs.push({ type: 'warn', message: args.join(' '), time: new Date().toLocaleTimeString() });
+        originalWarn.apply(console, args);
+      };
+      
+      // Mostrar overlay de erro
+      function showErrorOverlay() {
+        const existing = document.getElementById('error-overlay');
+        if (existing) return;
+        
+        const overlay = document.createElement('div');
+        overlay.id = 'error-overlay';
+        overlay.style.cssText = 'position:fixed;top:0;left:0;right:0;bottom:0;background:#000;color:#0f0;font-family:monospace;font-size:11px;padding:10px;overflow-y:auto;z-index:999999;';
+        
+        let html = '<div style="color:#fff;font-size:14px;margin-bottom:10px;"><strong>🐛 ERRO CRÍTICO iOS</strong></div>';
+        html += '<div style="margin-bottom:10px;padding:8px;background:#1a1a1a;border-radius:4px;">';
+        html += '<div style="color:#fff;">📱 User Agent:</div>';
+        html += '<div style="font-size:10px;word-break:break-all;">' + navigator.userAgent + '</div>';
+        html += '</div>';
+        
+        html += '<div style="color:#fff;margin-top:10px;"><strong>❌ ERROS (' + window.__errors.length + '):</strong></div>';
+        window.__errors.forEach(function(err) {
+          html += '<div style="margin-top:8px;padding:6px;background:#3a0000;border-left:3px solid #f00;border-radius:2px;">';
+          html += '<div style="color:#f66;font-size:10px;word-break:break-word;">' + err.message + '</div>';
+          if (err.filename) html += '<div style="color:#888;font-size:9px;">Arquivo: ' + err.filename + ':' + err.lineno + '</div>';
+          if (err.stack) html += '<div style="color:#666;font-size:9px;margin-top:4px;max-height:100px;overflow:auto;">' + err.stack + '</div>';
+          html += '</div>';
+        });
+        
+        html += '<div style="color:#fff;margin-top:10px;"><strong>📋 LOGS (' + window.__logs.length + '):</strong></div>';
+        window.__logs.slice(-20).forEach(function(log) {
+          const color = log.type === 'warn' ? '#fc6' : '#6f6';
+          html += '<div style="margin-top:4px;padding:4px;background:#0a0a0a;border-left:2px solid ' + color + ';font-size:10px;">';
+          html += '<span style="color:#888;">' + log.time + '</span> ';
+          html += '<span style="color:' + color + ';">' + log.message + '</span>';
+          html += '</div>';
+        });
+        
+        overlay.innerHTML = html;
+        document.body.appendChild(overlay);
+      }
+      
+      // Verificar após 3 segundos se React carregou
+      setTimeout(function() {
+        const root = document.getElementById('root');
+        if (!root || root.children.length === 0) {
+          window.__errors.push({
+            type: 'timeout',
+            message: 'React não carregou após 3 segundos - possível erro de bundle ou import',
+            time: new Date().toLocaleTimeString()
+          });
+          showErrorOverlay();
+        }
+      }, 3000);
+    </script>
+    
     <script type="module" src="/index.tsx"></script>
   </body>
 </html>
