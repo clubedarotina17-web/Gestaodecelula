@@ -93,6 +93,12 @@ const App: React.FC = () => {
   }, [cells, reports, shares, baptisms, goals, events, notifications]);
 
   const fetchData = async () => {
+    // Timeout de segurança para iOS/Safari
+    const timeoutId = setTimeout(() => {
+      console.warn('Timeout na sincronização - continuando com dados locais');
+      setLoading(false);
+    }, 10000); // 10 segundos
+
     try {
       console.log('Iniciando sincronização com Supabase...');
 
@@ -161,8 +167,10 @@ const App: React.FC = () => {
       }
 
       console.log('Sincronização concluída com sucesso.');
+      clearTimeout(timeoutId);
     } catch (error) {
       console.error('Erro crítico na sincronização:', error);
+      clearTimeout(timeoutId);
     } finally {
       setLoading(false);
     }
