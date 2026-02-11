@@ -93,6 +93,13 @@ const App: React.FC = () => {
   }, [cells, reports, shares, baptisms, goals, events, notifications]);
 
   const fetchData = async () => {
+    // Debug para iOS
+    console.log('=== INIT FETCH DATA ===');
+    console.log('Supabase URL:', import.meta.env.VITE_SUPABASE_URL ? 'PRESENTE' : 'AUSENTE');
+    console.log('Supabase Key:', import.meta.env.VITE_SUPABASE_ANON_KEY ? 'PRESENTE' : 'AUSENTE');
+    console.log('Supabase Client:', supabase ? 'INICIALIZADO' : 'NULL');
+    console.log('User Agent:', navigator.userAgent);
+
     // Timeout de segurança para iOS/Safari
     const timeoutId = setTimeout(() => {
       console.warn('Timeout na sincronização - continuando com dados locais');
@@ -100,6 +107,14 @@ const App: React.FC = () => {
     }, 10000); // 10 segundos
 
     try {
+      // Verificar se Supabase está disponível
+      if (!supabase) {
+        console.warn('⚠️ Supabase não disponível - usando apenas dados locais');
+        setLoading(false);
+        clearTimeout(timeoutId);
+        return;
+      }
+
       console.log('Iniciando sincronização com Supabase...');
 
       const { data: cellsData, error: cellsError } = await supabase.from('cells').select('*');
@@ -178,8 +193,16 @@ const App: React.FC = () => {
 
   useEffect(() => {
     fetchData();
-    const channel = supabase.channel('db-changes').on('postgres_changes', { event: '*', schema: 'public' }, () => fetchData()).subscribe();
-    return () => { supabase.removeChannel(channel); };
+
+    // Só criar canal se Supabase estiver disponível
+    if (supabase) {
+      const channel = supabase.channel('db-changes').on('postgres_changes', { event: '*', schema: 'public' }, () => fetchData()).subscribe();
+      return () => {
+        if (supabase) {
+          supabase.removeChannel(channel);
+        }
+      };
+    }
   }, []);
 
   const handleLogin = (role: UserRole, cell: Cell | null, rememberMe?: boolean) => {
@@ -206,7 +229,7 @@ const App: React.FC = () => {
     setCells(prev => [...prev, newCell]);
 
     // Persistência no Banco
-    await supabase.from('cells').insert([{
+    await supabase?.from('cells').insert([{
       id: tempId,
       name: newCellData.name,
       leader: newCellData.leader,
@@ -226,7 +249,7 @@ const App: React.FC = () => {
 
   const handleUpdateCell = async (updatedCell: Cell) => {
     setCells(prev => prev.map(c => c.id === updatedCell.id ? updatedCell : c));
-    await supabase.from('cells').update({
+    await supabase?.from('cells').update({
       name: updatedCell.name, leader: updatedCell.leader, host: updatedCell.host,
       trainee: updatedCell.trainee, secretary: updatedCell.secretary, team: updatedCell.team,
       address: updatedCell.address, type: updatedCell.type, day: updatedCell.day,
@@ -238,12 +261,12 @@ const App: React.FC = () => {
 
   const handleDeleteCell = async (id: string) => {
     setCells(prev => prev.filter(c => c.id !== id));
-    await supabase.from('cells').delete().eq('id', id);
+    await supabase?.from('cells').delete().eq('id', id);
   };
 
   const handleDismissLateAlert = async (cellId: string, date: string) => {
     setCells(prev => prev.map(c => c.id === cellId ? { ...c, dismissedLateDate: date } : c));
-    await supabase.from('cells').update({ dismissed_late_date: date }).eq('id', cellId);
+    await supabase?.from('cells').update({ dismissed_late_date: date }).eq('id', cellId);
   };
 
   // Funções de Relatórios
@@ -252,18 +275,20 @@ const App: React.FC = () => {
     const newReport = { ...newReportData, id: tempId };
     setReports(prev => [newReport, ...prev]);
 
-    const { error } = await supabase.from('reports').insert([{
+    const result = await supabase?.from('reports').insert([{
       id: tempId,
       cell_id: newReportData.cellId, cell_name: newReportData.cellName, date: newReportData.date,
       attendance: newReportData.attendance, visitors: newReportData.visitors, conversions: newReportData.conversions,
-      weekly_visits: newReportData.weeklyVisits, first_time_visitors_count: newReportData.firstTimeVisitorsCount,
-      first_time_visitors_list: newReportData.firstTimeVisitorsList, children_count: newReportData.childrenCount,
+      weekly_visits: newReportData.weeklyVisits,
+      first_time_visitors_count: newReportData.firstTimeVisitorsCount,
+      first_time_visitors_list: newReportData.firstTimeVisitorsList,
+      children_count: newReportData.childrenCount,
       offering: newReportData.offering, kids_offering: newReportData.kidsOffering, summary: newReportData.summary,
       is_late: newReportData.isLate
     }]);
 
-    if (error) {
-      console.error('Erro ao salvar relatório:', error);
+    if (result?.error) {
+      console.error('Erro ao adicionar relatório:', result.error);
       alert('Erro ao salvar no banco de dados. Verifique sua conexão.');
     }
 
@@ -276,12 +301,12 @@ const App: React.FC = () => {
 
   const handleDeleteReport = async (id: string) => {
     setReports(prev => prev.filter(r => r.id !== id));
-    await supabase.from('reports').delete().eq('id', id);
+    await supabase?.from('reports').delete().eq('id', id);
   };
 
   const handleUpdateReport = async (updatedReport: Report) => {
     setReports(prev => prev.map(r => r.id === updatedReport.id ? updatedReport : r));
-    await supabase.from('reports').update({
+    await supabase?.from('reports').update({
       date: updatedReport.date, attendance: updatedReport.attendance, visitors: updatedReport.visitors,
       conversions: updatedReport.conversions, weekly_visits: updatedReport.weeklyVisits,
       first_time_visitors_count: updatedReport.firstTimeVisitorsCount,
@@ -298,22 +323,22 @@ const App: React.FC = () => {
     const newGoal = { ...newGoalData, id: tempId };
     setGoals(prev => [...prev, newGoal]);
 
-    const { error } = await supabase.from('goals').insert([{
+    const result = await supabase?.from('goals').insert([{
       id: tempId,
       name: newGoalData.name, start_date: newGoalData.startDate, end_date: newGoalData.endDate,
       objective: newGoalData.objective, cell_type: newGoalData.cellType, cell_id: newGoalData.cellId,
       report: newGoalData.report, is_completed: newGoalData.isCompleted
     }]);
 
-    if (error) {
-      console.error('Erro ao salvar meta:', error);
+    if (result?.error) {
+      console.error('Erro ao salvar meta:', result.error);
       alert('Erro ao salvar meta no banco.');
     }
   };
 
   const handleUpdateGoal = async (updatedGoal: Goal) => {
     setGoals(prev => prev.map(g => g.id === updatedGoal.id ? updatedGoal : g));
-    await supabase.from('goals').update({
+    await supabase?.from('goals').update({
       name: updatedGoal.name, start_date: updatedGoal.startDate, end_date: updatedGoal.endDate,
       objective: updatedGoal.objective, cell_type: updatedGoal.cellType, cell_id: updatedGoal.cellId,
       report: updatedGoal.report, is_completed: updatedGoal.isCompleted
@@ -322,7 +347,7 @@ const App: React.FC = () => {
 
   const handleDeleteGoal = async (id: string) => {
     setGoals(prev => prev.filter(g => g.id !== id));
-    await supabase.from('goals').delete().eq('id', id);
+    await supabase?.from('goals').delete().eq('id', id);
   };
 
   // Outras Funções
@@ -330,24 +355,24 @@ const App: React.FC = () => {
     const tempId = Math.random().toString(36).substr(2, 9);
     const newNotif: AppNotification = { id: tempId, title, message, date: new Date().toISOString(), isRead: false, type: type as any, visitorPhone, cellId };
     setNotifications(prev => [newNotif, ...prev]);
-    await supabase.from('notifications').insert([{ title, message, type, visitor_phone: visitorPhone, cell_id: cellId, is_read: false }]);
+    await supabase?.from('notifications').insert([{ title, message, type, visitor_phone: visitorPhone, cell_id: cellId, is_read: false }]);
   };
 
   const markNotifRead = async (id: string) => {
     setNotifications(prev => prev.map(n => n.id === id ? { ...n, isRead: true } : n));
-    await supabase.from('notifications').update({ is_read: true }).eq('id', id);
+    await supabase?.from('notifications').update({ is_read: true }).eq('id', id);
   };
 
   const deleteNotification = async (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
-    await supabase.from('notifications').delete().eq('id', id);
+    await supabase?.from('notifications').delete().eq('id', id);
   };
 
   const handleAddShare = async (newShareData: Omit<Share, 'id'>) => {
     const tempId = Math.random().toString(36).substr(2, 9);
     const newShare = { ...newShareData, id: tempId };
     setShares(prev => [newShare, ...prev]);
-    await supabase.from('shares').insert([{
+    await supabase?.from('shares').insert([{
       id: tempId,
       title: newShareData.title,
       description: newShareData.description,
@@ -358,14 +383,14 @@ const App: React.FC = () => {
 
   const handleDeleteShare = async (id: string) => {
     setShares(prev => prev.filter(s => s.id !== id));
-    await supabase.from('shares').delete().eq('id', id);
+    await supabase?.from('shares').delete().eq('id', id);
   };
 
   const handleAddBaptism = async (newBaptismData: Omit<Baptism, 'id'>) => {
     const tempId = Math.random().toString(36).substr(2, 9);
     const newBaptism = { ...newBaptismData, id: tempId };
     setBaptisms(prev => [...prev, newBaptism]);
-    await supabase.from('baptisms').insert([{
+    await supabase?.from('baptisms').insert([{
       id: tempId,
       name: newBaptismData.name,
       whatsapp: newBaptismData.whatsapp,
@@ -378,7 +403,7 @@ const App: React.FC = () => {
     const tempId = Math.random().toString(36).substr(2, 9);
     const newEvent = { ...newEventData, id: tempId };
     setEvents(prev => [...prev, newEvent].sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime()));
-    await supabase.from('events').insert([{
+    await supabase?.from('events').insert([{
       title: newEventData.title,
       description: newEventData.description,
       date: newEventData.date,
@@ -389,7 +414,7 @@ const App: React.FC = () => {
 
   const handleDeleteEvent = async (id: string) => {
     setEvents(prev => prev.filter(e => e.id !== id));
-    await supabase.from('events').delete().eq('id', id);
+    await supabase?.from('events').delete().eq('id', id);
   };
 
   if (loading) {
