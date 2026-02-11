@@ -392,7 +392,7 @@ const App: React.FC = () => {
     await supabase.from('events').delete().eq('id', id);
   };
 
-  if (loading && !authState.isAuthenticated) {
+  if (loading) {
     return (
       <div className="min-h-screen bg-black flex flex-col items-center justify-center p-8 text-center">
         <div className="w-24 h-24 mb-6 animate-pulse">
