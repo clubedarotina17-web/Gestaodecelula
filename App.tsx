@@ -1,4 +1,5 @@
 
+console.log('🚀 [App.tsx] Arquivo carregado!');
 
 import React, { useState, useEffect } from 'react';
 import { supabase } from './lib/supabase';
@@ -11,8 +12,10 @@ import { DebugOverlay } from './components/DebugOverlay';
 import { UserRole, Cell, Report, Share, Baptism, AppNotification, Goal, AppEvent } from './types';
 import { INITIAL_CELLS } from './constants';
 
+console.log('🚀 [App.tsx] Imports concluídos');
 
 const App: React.FC = () => {
+  console.log('🚀 [App.tsx] Componente App iniciando...');
   // Estados inicializados vazios - dados vêm do Supabase via fetchData()
   // Removido localStorage para evitar QuotaExceededError no iOS Safari
   const [cells, setCells] = useState<Cell[]>(INITIAL_CELLS);
