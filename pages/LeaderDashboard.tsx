@@ -105,16 +105,22 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
     const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
     if (SpeechRecognition) {
       recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
+      recognitionRef.current.continuous = false; // Mudado para false para evitar repetições
+      recognitionRef.current.interimResults = false; // Mudado para false - apenas resultados finais
       recognitionRef.current.lang = 'pt-BR';
       recognitionRef.current.onresult = (event: any) => {
-        let finalTranscript = '';
-        for (let i = event.resultIndex; i < event.results.length; ++i) {
-          if (event.results[i].isFinal) finalTranscript += event.results[i][0].transcript;
-        }
-        if (finalTranscript) {
-          setFormData(prev => ({ ...prev, summary: prev.summary + (prev.summary ? ' ' : '') + finalTranscript }));
+        // Pega apenas o último resultado final
+        const lastResult = event.results[event.results.length - 1];
+        if (lastResult.isFinal) {
+          const transcript = lastResult[0].transcript.trim();
+          if (transcript) {
+            setFormData(prev => {
+              const currentSummary = prev.summary;
+              const newText = currentSummary ? `${currentSummary} ${transcript}` : transcript;
+              // Limita a 300 caracteres
+              return { ...prev, summary: newText.slice(0, 300) };
+            });
+          }
         }
       };
       recognitionRef.current.onend = () => setIsRecording(false);
@@ -161,8 +167,12 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
   };
 
   const toggleRecording = () => {
-    if (isRecording) recognitionRef.current?.stop();
-    else { setIsRecording(true); recognitionRef.current?.start(); }
+    if (isRecording) {
+      recognitionRef.current?.stop();
+    } else {
+      setIsRecording(true);
+      recognitionRef.current?.start();
+    }
   };
 
   const handleFirstTimeCountChange = (val: string) => {
@@ -503,7 +513,8 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
               </div>
               <div className="space-y-1.5">
                 <div className="flex items-center justify-between"><label className="text-[11px] font-bold text-gray-700">Resumo / Testemunhos</label><button type="button" onClick={toggleRecording} className={`px-3 py-1 rounded-full text-[9px] font-black uppercase ${isRecording ? 'bg-red-500 text-white' : 'bg-secondary/10 text-secondary'}`}>{isRecording ? 'Ouvindo...' : 'Narrar'}</button></div>
-                <textarea rows={5} placeholder="O que Deus fez?..." value={formData.summary} onChange={(e) => setFormData({ ...formData, summary: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl outline-none text-sm font-medium resize-none break-words whitespace-pre-wrap overflow-hidden" />
+                <textarea rows={5} maxLength={300} placeholder="O que Deus fez?..." value={formData.summary} onChange={(e) => setFormData({ ...formData, summary: e.target.value })} className="w-full p-4 bg-gray-50 border-none rounded-2xl outline-none text-sm font-medium resize-none break-words whitespace-pre-wrap overflow-hidden" />
+                <p className="text-[10px] text-gray-400 font-bold text-right">{formData.summary.length}/300 caracteres</p>
               </div>
               <div className="flex gap-3 pt-2">
                 {editingId && <button type="button" onClick={cancelEdit} className="flex-1 bg-gray-100 py-4 rounded-xl font-bold uppercase text-xs">Cancelar</button>}
