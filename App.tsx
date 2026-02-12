@@ -373,6 +373,11 @@ const App: React.FC = () => {
     }]);
   };
 
+  const handleDeleteBaptism = async (id: string) => {
+    setBaptisms(prev => prev.filter(b => b.id !== id));
+    await supabase?.from('baptisms').delete().eq('id', id);
+  };
+
   const handleAddEvent = async (newEventData: Omit<AppEvent, 'id'>) => {
     const tempId = Math.random().toString(36).substr(2, 9);
     const newEvent = { ...newEventData, id: tempId };
@@ -410,7 +415,7 @@ const App: React.FC = () => {
   return (
     <Layout role={authState.role} onLogout={handleLogout} activeTab={activeTab} setActiveTab={setActiveTab} cellName={authState.cell?.name} cellId={authState.cell?.id} leaderPhoto={authState.cell?.leaderPhoto} notifications={notifications} onMarkAsRead={markNotifRead} onDeleteNotification={deleteNotification}>
       {authState.role === 'admin' ? (
-        <AdminDashboard cells={cells} reports={reports} shares={shares} baptisms={baptisms} goals={goals} events={events} activeTab={activeTab} onAddShare={handleAddShare} onDeleteShare={handleDeleteShare} onAddBaptism={handleAddBaptism} onDeleteReport={handleDeleteReport} onUpdateCell={handleUpdateCell} onAddCell={handleAddCell} onDeleteCell={handleDeleteCell} onAddGoal={handleAddGoal} onUpdateGoal={handleUpdateGoal} onDeleteGoal={handleDeleteGoal} onNotify={addNotification} onDismissLateAlert={handleDismissLateAlert} onAddEvent={handleAddEvent} onDeleteEvent={handleDeleteEvent} />
+        <AdminDashboard cells={cells} reports={reports} shares={shares} baptisms={baptisms} goals={goals} events={events} activeTab={activeTab} onAddShare={handleAddShare} onDeleteShare={handleDeleteShare} onAddBaptism={handleAddBaptism} onDeleteBaptism={handleDeleteBaptism} onDeleteReport={handleDeleteReport} onUpdateCell={handleUpdateCell} onAddCell={handleAddCell} onDeleteCell={handleDeleteCell} onAddGoal={handleAddGoal} onUpdateGoal={handleUpdateGoal} onDeleteGoal={handleDeleteGoal} onNotify={addNotification} onDismissLateAlert={handleDismissLateAlert} onAddEvent={handleAddEvent} onDeleteEvent={handleDeleteEvent} />
       ) : (
         <LeaderDashboard cell={authState.cell!} reports={reports} shares={shares} events={events} activeTab={activeTab} setActiveTab={setActiveTab} onAddReport={handleAddReport} onUpdateReport={handleUpdateReport} onDeleteReport={handleDeleteReport} onNotify={addNotification} />
       )}
