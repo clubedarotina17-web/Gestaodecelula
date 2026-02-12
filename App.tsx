@@ -73,7 +73,7 @@ const App: React.FC = () => {
     const timeoutId = setTimeout(() => {
       console.warn('Timeout na sincronização - continuando com dados locais');
       setLoading(false);
-    }, 10000); // 10 segundos
+    }, 5000); // 5 segundos - suficiente para Supabase responder
 
     try {
       // Verificar se Supabase está disponível
