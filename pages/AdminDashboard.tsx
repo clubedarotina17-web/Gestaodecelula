@@ -135,6 +135,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const filteredReportsForList = useMemo(() => {
     return (reports || []).filter(r => {
       const cell = cells.find(c => c.id === r.cellId);
+      if (cell?.type === 'Kids') return false; // Excluir Kids da aba geral
+
       const matchType = filterType === 'Todas' || (cell && cell.type === filterType);
       const matchCellName = filterCell === 'Todas' || r.cellName === filterCell;
 
@@ -146,6 +148,16 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
   }, [reports, reportFilterPeriod, reportFilterYear, reportFilterDate, filterType, filterCell, cells]);
 
+  const kidsReportsForList = useMemo(() => {
+    return (reports || []).filter(r => {
+      const cell = cells.find(c => c.id === r.cellId);
+      if (cell?.type !== 'Kids') return false; // Apenas Kids
+
+      const reportDate = new Date(r.date + 'T12:00:00');
+      return checkPeriodMatch(reportDate, reportFilterPeriod, reportFilterYear);
+    }).sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime());
+  }, [reports, reportFilterPeriod, reportFilterYear, cells]);
+
   const lateReportsList = useMemo(() => {
     const today = new Date();
     const dayMap: { [key: string]: number } = {
@@ -156,6 +168,43 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
     const results: { cell: CellTypeData, dateStr: string }[] = [];
 
     (cells || []).forEach(cell => {
+      if (cell.type === 'Kids') return; // Excluir Kids da lista geral
+      const cellDayName = cell.day.split(' ')[0].trim();
+      const meetingDayIndex = dayMap[cellDayName];
+      if (meetingDayIndex === undefined) return;
+
+      const lastMeetingDate = new Date(today);
+      let diff = today.getDay() - meetingDayIndex;
+      if (diff < 0) diff += 7;
+      lastMeetingDate.setDate(today.getDate() - diff);
+
+      const [hours, minutes] = (cell.time || '20:00').split(':').map(Number);
+      lastMeetingDate.setHours(hours, minutes, 0, 0);
+
+      const timeSinceMeeting = today.getTime() - lastMeetingDate.getTime();
+      const isOver24h = timeSinceMeeting >= (24 * 60 * 60 * 1000);
+
+      if (isOver24h) {
+        const dateStr = getLocalDateString(lastMeetingDate);
+        if (cell.dismissedLateDate === dateStr) return;
+        const hasReport = (reports || []).some(r => r.cellId === cell.id && r.date === dateStr);
+        if (!hasReport) results.push({ cell, dateStr });
+      }
+    });
+
+    return results;
+  }, [cells, reports]);
+
+  const kidsLateReportsList = useMemo(() => {
+    const today = new Date();
+    const dayMap: { [key: string]: number } = {
+      'Domingo': 0, 'Segunda-Feira': 1, 'Terça-Feira': 2, 'Quarta-Feira': 3,
+      'Quinta-Feira': 4, 'Sexta-Feira': 5, 'Sábado': 6
+    };
+
+    const results: { cell: CellTypeData, dateStr: string }[] = [];
+
+    (cells || []).filter(c => c.type === 'Kids').forEach(cell => {
       const cellDayName = cell.day.split(' ')[0].trim();
       const meetingDayIndex = dayMap[cellDayName];
       if (meetingDayIndex === undefined) return;
@@ -458,7 +507,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <option value="Adulto">Adulto</option>
                   <option value="Jovem">Jovem</option>
                   <option value="Juvenil">Juvenil</option>
-                  <option value="Kids">Kids</option>
                 </select>
               </div>
               <div className="flex items-center gap-2 px-3 border-r border-gray-100 h-10">
@@ -802,6 +850,59 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 </AreaChart>
               </ResponsiveContainer>
             </div>
+          </div>
+
+          {kidsLateReportsList.length > 0 && (
+            <div className="space-y-4 px-2">
+              <h4 className="text-[10px] font-black text-amber-600 uppercase tracking-[0.2em] flex items-center gap-2 ml-1"><AlertCircle size={14} /> Relatórios Kids Pendentes (Atrasados)</h4>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                {kidsLateReportsList.map(item => (
+                  <div key={`late-kids-${item.cell.id}`} className="bg-white border-2 border-amber-100 p-4 md:p-5 rounded-[2rem] flex flex-row items-center justify-between shadow-xl shadow-amber-500/5 group">
+                    <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0 pr-2">
+                      <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><Clock className="w-5 h-5 md:w-6 md:h-6" /></div>
+                      <div className="min-w-0">
+                        <p className="font-black text-primary text-[10px] md:text-xs uppercase leading-tight">Relatório pendente de {new Date(item.dateStr + 'T12:00:00').toLocaleDateString()} - Célula Kids: {item.cell.name}</p>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
+                      <button onClick={() => handleChargeLeader(item.cell, item.dateStr)} className="p-2.5 md:p-3 bg-green-500 text-white rounded-xl md:rounded-2xl hover:bg-green-600 transition-all shadow-md shadow-green-500/20 active:scale-95"><MessageCircle className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
+                      <button onClick={() => handleDismissLateAlertInternal(item.cell.id, item.dateStr)} className="p-2.5 md:p-3 bg-gray-100 text-gray-400 rounded-xl md:rounded-2xl hover:bg-red-50 hover:text-red-500 transition-all active:scale-95"><X className="w-4 h-4 md:w-[18px] md:h-[18px]" /></button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          <div className="space-y-6 pt-10">
+            <h4 className="text-xl font-black text-primary uppercase tracking-tighter ml-2">Relatórios Kids Registrados</h4>
+            {kidsReportsForList.length === 0 ? (
+              <div className="bg-white p-24 rounded-[3.5rem] text-center border-2 border-dashed border-gray-200">
+                <Search size={64} className="mx-auto mb-4 opacity-5 text-secondary" /><p className="font-black text-gray-400 uppercase tracking-widest text-[10px]">Nenhum relatório kids encontrado</p>
+              </div>
+            ) : (
+              kidsReportsForList.map(report => (
+                <div key={report.id} className="bg-white rounded-[2rem] shadow-sm border border-gray-50 overflow-hidden group hover:shadow-xl transition-all">
+                  <div className="bg-gray-50/50 px-6 py-4 flex items-center justify-between border-b border-gray-100">
+                    <div className="flex items-center gap-4">
+                      <div className="bg-primary text-white w-12 h-12 rounded-[1.25rem] flex flex-col items-center justify-center shadow-lg">
+                        <span className="text-[8px] font-black uppercase leading-none opacity-60">{new Date(report.date + 'T12:00:00').toLocaleDateString('pt-BR', { month: 'short' })}</span>
+                        <span className="text-xl font-black leading-none">{new Date(report.date + 'T12:00:00').getDate()}</span>
+                      </div>
+                      <div><p className="font-black text-primary text-xs uppercase leading-tight tracking-wider">{report.cellName}</p><p className="text-[9px] text-secondary font-black uppercase mt-0.5">{getDayOfWeek(report.date)}</p></div>
+                    </div>
+                    <button onClick={() => onDeleteReport(report.id)} className="p-2 text-gray-400 hover:text-red-500 transition-colors"><Trash2 size={16} /></button>
+                  </div>
+                  <div className="p-6 space-y-6">
+                    <p className="text-sm text-gray-600 font-bold italic border-l-4 border-secondary/20 pl-4">"{report.summary || 'Sem resumo.'}"</p>
+                    <div className="flex flex-wrap gap-4">
+                      <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 min-w-[140px]"><p className="text-[9px] font-black text-blue-500 uppercase mb-1 tracking-widest">Crianças</p><p className="text-2xl font-black text-primary">{report.childrenCount || 0}</p></div>
+                      <div className="p-4 bg-green-50 rounded-2xl border border-green-100 min-w-[140px]"><p className="text-[9px] font-black text-green-500 uppercase mb-1 tracking-widest">Oferta Kids</p><p className="text-xl font-black text-green-700">R$ {(report.kidsOffering || 0).toFixed(2)}</p></div>
+                    </div>
+                  </div>
+                </div>
+              ))
+            )}
           </div>
         </div>
       )}
