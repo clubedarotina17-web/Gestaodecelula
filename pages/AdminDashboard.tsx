@@ -75,7 +75,8 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const [cellFormData, setCellFormData] = useState<Omit<CellTypeData, 'id'>>({
     name: '', leader: '', host: '', trainee: '', secretary: '', team: [],
     address: '', type: 'Adulto', day: 'Quinta-Feira', time: '20:00',
-    region: 'Dom Bosco', phone: '', leaderPhoto: ''
+    region: 'Dom Bosco', phone: '', leaderPhoto: '',
+    parentAdultCellId: '', initialChildrenCount: 0, initialKidsOffering: 0
   });
 
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -284,13 +285,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const handleOpenCellForm = (cell?: CellTypeData) => {
     if (cell) {
       setEditingCellId(cell.id);
-      setCellFormData({ ...cell, team: cell.team || [] });
+      setCellFormData({
+        name: cell.name,
+        leader: cell.leader,
+        host: cell.host,
+        trainee: cell.trainee,
+        secretary: cell.secretary,
+        team: [...cell.team],
+        address: cell.address,
+        type: cell.type,
+        day: cell.day,
+        time: cell.time,
+        region: cell.region,
+        phone: cell.phone,
+        leaderPhoto: cell.leaderPhoto || '',
+        parentAdultCellId: cell.parentAdultCellId || '',
+        initialChildrenCount: cell.initialChildrenCount || 0,
+        initialKidsOffering: cell.initialKidsOffering || 0
+      });
     } else {
       setEditingCellId(null);
       setCellFormData({
         name: '', leader: '', host: '', trainee: '', secretary: '', team: [],
         address: '', type: 'Adulto', day: 'Quinta-Feira', time: '20:00',
-        region: 'Dom Bosco', phone: '', leaderPhoto: ''
+        region: 'Dom Bosco', phone: '', leaderPhoto: '',
+        parentAdultCellId: '', initialChildrenCount: 0, initialKidsOffering: 0
       });
     }
     setShowCellForm(true);
@@ -534,62 +553,120 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
               <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={() => setShowCellForm(false)}></div>
               <div className="bg-white w-full max-w-4xl rounded-[3rem] p-8 md:p-12 relative z-10 shadow-2xl overflow-y-auto max-h-[90vh]">
                 <h4 className="text-2xl font-black text-primary uppercase mb-8 border-b border-gray-100 pb-4">{editingCellId ? 'Editar' : 'Nova'} Célula</h4>
-                <form onSubmit={handleCellFormSubmit} className="space-y-8">
-                  <div className="space-y-6">
-                    <div className="flex flex-col md:flex-row items-center gap-8">
-                      <div className="relative group">
-                        <div className="w-44 h-44 bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden shadow-inner group-hover:border-secondary transition-colors">
-                          {cellFormData.leaderPhoto ? <img src={cellFormData.leaderPhoto} className="w-full h-full object-cover" alt="Líder" /> : <Camera className="text-gray-300 group-hover:text-secondary" size={40} />}
-                        </div>
-                        <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} className="hidden" accept="image/*" />
-                        <button type="button" onClick={() => fileInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-secondary text-white p-3 rounded-2xl shadow-lg hover:scale-110 transition-transform"><Upload size={20} /></button>
-                      </div>
-                      <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
-                        <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Nome da Célula</label><input type="text" required value={cellFormData.name} onChange={e => setCellFormData({ ...cellFormData, name: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
-                        <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Líder Principal</label><input type="text" required value={cellFormData.leader} onChange={e => setCellFormData({ ...cellFormData, leader: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Tipo</label><select value={cellFormData.type} onChange={e => setCellFormData({ ...cellFormData, type: e.target.value as any })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none"><option value="Adulto">Adulto</option><option value="Jovem">Jovem</option><option value="Juvenil">Juvenil</option><option value="Kids">Kids</option></select></div>
-                      <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Telefone Líder</label><input type="text" value={cellFormData.phone} onChange={e => setCellFormData({ ...cellFormData, phone: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
-                      <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Líder em Treinamento</label><input type="text" value={cellFormData.trainee} onChange={e => setCellFormData({ ...cellFormData, trainee: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50/50 rounded-[2.5rem] border border-gray-100">
-                    <div className="space-y-4">
-                      <h5 className="text-[11px] font-black text-primary uppercase tracking-widest flex items-center gap-2"><Home size={14} className="text-secondary" /> Local e Apoio</h5>
-                      <div className="space-y-1"><label className="text-[9px] font-black text-gray-400 uppercase ml-1">Anfitrião</label><input type="text" value={cellFormData.host} onChange={e => setCellFormData({ ...cellFormData, host: e.target.value })} className="w-full p-3.5 bg-white border border-gray-100 rounded-xl outline-none focus:border-secondary font-bold text-sm" /></div>
-                      <div className="space-y-1"><label className="text-[9px] font-black text-gray-400 uppercase ml-1">Secretária(o)</label><input type="text" value={cellFormData.secretary} onChange={e => setCellFormData({ ...cellFormData, secretary: e.target.value })} className="w-full p-3.5 bg-white border border-gray-100 rounded-xl outline-none focus:border-secondary font-bold text-sm" /></div>
-                    </div>
-                    <div className="space-y-4">
-                      <h5 className="text-[11px] font-black text-primary uppercase tracking-widest flex items-center gap-2"><Users size={14} className="text-secondary" /> Equipe de Trabalho (Até 10)</h5>
-                      <div className="grid grid-cols-2 gap-2">{Array.from({ length: 10 }).map((_, idx) => (<input key={idx} type="text" placeholder={`Membro ${idx + 1}`} value={cellFormData.team[idx] || ''} onChange={e => handleTeamMemberChange(idx, e.target.value)} className="w-full p-2.5 bg-white border border-gray-100 rounded-lg outline-none focus:border-secondary font-bold text-[10px]" />))}</div>
-                    </div>
-                  </div>
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Endereço Completo</label><input type="text" required value={cellFormData.address} onChange={e => setCellFormData({ ...cellFormData, address: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
-                    <div className="space-y-4">
-                      {/* Reorganização conforme solicitado: Dia e Hora abaixo de Região */}
-                      <div className="space-y-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                <form onSubmit={handleCellFormSubmit} className="space-y-8 text-primary">
+                  {cellFormData.type === 'Kids' ? (
+                    <div className="space-y-6 animate-in fade-in duration-500">
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div className="space-y-1">
-                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Cidade</label>
-                          <input type="text" value={cellFormData.region} onChange={e => setCellFormData({ ...cellFormData, region: e.target.value })} className="w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Nome da Célula Kids</label>
+                          <input type="text" required value={cellFormData.name} onChange={e => setCellFormData({ ...cellFormData, name: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
                         </div>
-                        <div className="grid grid-cols-2 gap-4">
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Dia do Encontro</label>
-                            <select value={cellFormData.day} onChange={e => setCellFormData({ ...cellFormData, day: e.target.value })} className="w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none">
-                              {WEEK_DAYS.map(day => <option key={day} value={day}>{day}</option>)}
-                            </select>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Líder Kids</label>
+                          <input type="text" required value={cellFormData.leader} onChange={e => setCellFormData({ ...cellFormData, leader: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Líder Kids em Treinamento</label>
+                          <input type="text" value={cellFormData.trainee} onChange={e => setCellFormData({ ...cellFormData, trainee: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Célula de Adulto que Pertence</label>
+                          <select
+                            required
+                            value={cellFormData.parentAdultCellId}
+                            onChange={e => setCellFormData({ ...cellFormData, parentAdultCellId: e.target.value })}
+                            className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none cursor-pointer"
+                          >
+                            <option value="">Selecione a célula...</option>
+                            {cells.filter(c => c.type === 'Adulto').map(c => (
+                              <option key={c.id} value={c.id}>{c.name}</option>
+                            ))}
+                          </select>
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Total de Crianças</label>
+                          <input type="number" value={cellFormData.initialChildrenCount || ''} onChange={e => setCellFormData({ ...cellFormData, initialChildrenCount: parseInt(e.target.value) || 0 })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+                        </div>
+                        <div className="space-y-1">
+                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Oferta Kids</label>
+                          <input type="number" step="0.01" value={cellFormData.initialKidsOffering || ''} onChange={e => setCellFormData({ ...cellFormData, initialKidsOffering: parseFloat(e.target.value) || 0 })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+                        </div>
+                      </div>
+
+                      <div className="pt-4 border-t border-gray-100">
+                        <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Trocar Tipo (Apenas se necessário)</label>
+                        <select value={cellFormData.type} onChange={e => setCellFormData({ ...cellFormData, type: e.target.value as any })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none">
+                          <option value="Adulto">Adulto</option>
+                          <option value="Jovem">Jovem</option>
+                          <option value="Juvenil">Juvenil</option>
+                          <option value="Kids">Kids</option>
+                        </select>
+                      </div>
+                    </div>
+                  ) : (
+                    <>
+                      <div className="space-y-6">
+                        <div className="flex flex-col md:flex-row items-center gap-8">
+                          <div className="relative group">
+                            <div className="w-44 h-44 bg-gray-50 rounded-[2.5rem] border-2 border-dashed border-gray-200 flex items-center justify-center overflow-hidden shadow-inner group-hover:border-secondary transition-colors">
+                              {cellFormData.leaderPhoto ? <img src={cellFormData.leaderPhoto} className="w-full h-full object-cover" alt="Líder" /> : <Camera className="text-gray-300 group-hover:text-secondary" size={40} />}
+                            </div>
+                            <input type="file" ref={fileInputRef} onChange={handlePhotoUpload} className="hidden" accept="image/*" />
+                            <button type="button" onClick={() => fileInputRef.current?.click()} className="absolute -bottom-2 -right-2 bg-secondary text-white p-3 rounded-2xl shadow-lg hover:scale-110 transition-transform"><Upload size={20} /></button>
                           </div>
-                          <div className="space-y-1">
-                            <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Hora do Encontro</label>
-                            <input type="time" value={cellFormData.time} onChange={e => setCellFormData({ ...cellFormData, time: e.target.value })} className="w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+                          <div className="flex-1 grid grid-cols-1 md:grid-cols-2 gap-4 w-full">
+                            <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Nome da Célula</label><input type="text" required value={cellFormData.name} onChange={e => setCellFormData({ ...cellFormData, name: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
+                            <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Líder Principal</label><input type="text" required value={cellFormData.leader} onChange={e => setCellFormData({ ...cellFormData, leader: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
+                          </div>
+                        </div>
+                        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+                          <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Tipo</label><select value={cellFormData.type} onChange={e => setCellFormData({ ...cellFormData, type: e.target.value as any })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none"><option value="Adulto">Adulto</option><option value="Jovem">Jovem</option><option value="Juvenil">Juvenil</option><option value="Kids">Kids</option></select></div>
+                          <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Telefone Líder</label><input type="text" value={cellFormData.phone} onChange={e => setCellFormData({ ...cellFormData, phone: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
+                          <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Líder em Treinamento</label><input type="text" value={cellFormData.trainee} onChange={e => setCellFormData({ ...cellFormData, trainee: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 p-6 bg-gray-50/50 rounded-[2.5rem] border border-gray-100">
+                        <div className="space-y-4">
+                          <h5 className="text-[11px] font-black text-primary uppercase tracking-widest flex items-center gap-2"><Home size={14} className="text-secondary" /> Local e Apoio</h5>
+                          <div className="space-y-1"><label className="text-[9px] font-black text-gray-400 uppercase ml-1">Anfitrião</label><input type="text" value={cellFormData.host} onChange={e => setCellFormData({ ...cellFormData, host: e.target.value })} className="w-full p-3.5 bg-white border border-gray-100 rounded-xl outline-none focus:border-secondary font-bold text-sm" /></div>
+                          <div className="space-y-1"><label className="text-[9px] font-black text-gray-400 uppercase ml-1">Secretária(o)</label><input type="text" value={cellFormData.secretary} onChange={e => setCellFormData({ ...cellFormData, secretary: e.target.value })} className="w-full p-3.5 bg-white border border-gray-100 rounded-xl outline-none focus:border-secondary font-bold text-sm" /></div>
+                        </div>
+                        <div className="space-y-4">
+                          <h5 className="text-[11px] font-black text-primary uppercase tracking-widest flex items-center gap-2"><Users size={14} className="text-secondary" /> Equipe de Trabalho (Até 10)</h5>
+                          <div className="grid grid-cols-2 gap-2">{Array.from({ length: 10 }).map((_, idx) => (<input key={idx} type="text" placeholder={`Membro ${idx + 1}`} value={cellFormData.team[idx] || ''} onChange={e => handleTeamMemberChange(idx, e.target.value)} className="w-full p-2.5 bg-white border border-gray-100 rounded-lg outline-none focus:border-secondary font-bold text-[10px]" />))}</div>
+                        </div>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Endereço Completo</label><input type="text" required value={cellFormData.address} onChange={e => setCellFormData({ ...cellFormData, address: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
+                        <div className="space-y-4">
+                          <div className="space-y-4 bg-gray-50/50 p-4 rounded-2xl border border-gray-100">
+                            <div className="space-y-1">
+                              <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Cidade</label>
+                              <input type="text" value={cellFormData.region} onChange={e => setCellFormData({ ...cellFormData, region: e.target.value })} className="w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+                            </div>
+                            <div className="grid grid-cols-2 gap-4">
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Dia do Encontro</label>
+                                <select value={cellFormData.day} onChange={e => setCellFormData({ ...cellFormData, day: e.target.value })} className="w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none">
+                                  {WEEK_DAYS.map(day => <option key={day} value={day}>{day}</option>)}
+                                </select>
+                              </div>
+                              <div className="space-y-1">
+                                <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Hora do Encontro</label>
+                                <input type="time" value={cellFormData.time} onChange={e => setCellFormData({ ...cellFormData, time: e.target.value })} className="w-full p-4 bg-white border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
+                              </div>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  </div>
+                    </>
+                  )}
                   <div className="flex gap-4"><button type="button" onClick={() => setShowCellForm(false)} className="flex-1 py-4 bg-gray-100 text-gray-500 rounded-2xl font-black uppercase text-xs">Cancelar</button><button type="submit" className="flex-[2] py-4 bg-secondary text-primary rounded-2xl font-black uppercase text-xs shadow-lg">Salvar Célula</button></div>
                 </form>
               </div>

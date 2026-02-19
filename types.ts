@@ -25,6 +25,9 @@ export interface Cell {
   phone: string;
   leaderPhoto?: string; // Base64 da imagem do líder
   dismissedLateDate?: string; // Data do alerta de atraso ignorador
+  parentAdultCellId?: string; // Célula de adulto que pertence (para tipo Kids)
+  initialChildrenCount?: number; // Total de crianças (para tipo Kids)
+  initialKidsOffering?: number; // Oferta kids (para tipo Kids)
 }
 
 export interface Report {

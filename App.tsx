@@ -92,7 +92,10 @@ const App: React.FC = () => {
         setCells(cellsData.map(c => ({
           ...c,
           leaderPhoto: c.leader_photo,
-          dismissedLateDate: c.dismissed_late_date
+          dismissedLateDate: c.dismissed_late_date,
+          parentAdultCellId: c.parent_adult_cell_id,
+          initialChildrenCount: c.initial_children_count,
+          initialKidsOffering: Number(c.initial_kids_offering)
         })));
       }
 
@@ -217,7 +220,10 @@ const App: React.FC = () => {
       time: newCellData.time,
       region: newCellData.region,
       phone: newCellData.phone,
-      leader_photo: newCellData.leaderPhoto
+      leader_photo: newCellData.leaderPhoto,
+      parent_adult_cell_id: newCellData.parentAdultCellId,
+      initial_children_count: newCellData.initialChildrenCount,
+      initial_kids_offering: newCellData.initialKidsOffering
     }]);
   };
 
@@ -228,7 +234,10 @@ const App: React.FC = () => {
       trainee: updatedCell.trainee, secretary: updatedCell.secretary, team: updatedCell.team,
       address: updatedCell.address, type: updatedCell.type, day: updatedCell.day,
       time: updatedCell.time, region: updatedCell.region, phone: updatedCell.phone,
-      leader_photo: updatedCell.leaderPhoto
+      leader_photo: updatedCell.leaderPhoto,
+      parent_adult_cell_id: updatedCell.parentAdultCellId,
+      initial_children_count: updatedCell.initialChildrenCount,
+      initial_kids_offering: updatedCell.initialKidsOffering
     }).eq('id', updatedCell.id);
     if (authState.cell?.id === updatedCell.id) setAuthState(prev => ({ ...prev, cell: updatedCell }));
   };
