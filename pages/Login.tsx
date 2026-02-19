@@ -10,7 +10,7 @@ interface LoginProps {
 
 const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
   const [role, setRole] = useState<UserRole>('leader');
-  const [step, setStep] = useState(0); // 0: Select Role, 1: Select Type, 2: Select Cell
+  const [step, setStep] = useState(0); // 0: Select Type (Leader) / Password (Admin), 1: Select Cell (Leader)
   const [selectedType, setSelectedType] = useState<CellType | ''>('');
   const [password, setPassword] = useState('');
   const [selectedCellId, setSelectedCellId] = useState('');
@@ -29,13 +29,11 @@ const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
       }
     } else {
       if (step === 0) {
-        setStep(1);
-      } else if (step === 1) {
         if (!selectedType) {
           setError('Escolha o tipo de célula.');
           return;
         }
-        setStep(2);
+        setStep(1);
       } else {
         if (!selectedCellId) {
           setError('Selecione uma célula para acessar.');
@@ -62,51 +60,69 @@ const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
           </div>
           <h2 className="text-3xl font-black text-white mb-2 tracking-tight">Gestão de Célula</h2>
           <p className="text-[#00A9B0] font-bold">
-            {role === 'admin' ? 'Acesso Administrativo' : step === 1 ? 'Qual o tipo da célula?' : step === 2 ? 'Agora selecione sua célula' : 'Selecione seu perfil de acesso'}
+            {role === 'admin' ? 'Acesso Administrativo' : step === 0 ? 'Escolha o tipo da célula' : 'Agora selecione sua célula'}
           </p>
         </div>
 
-        {step === 0 && (
-          <div className="flex p-1.5 bg-white/5 rounded-[1.25rem] mb-8">
-            <button
-              onClick={() => { setRole('leader'); setError(''); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl transition-all duration-300 ${role === 'leader' ? 'bg-secondary text-primary shadow-sm font-bold scale-[1.02]' : 'text-gray-400 font-medium hover:text-gray-200'}`}
-            >
-              <User size={18} /> Líder
-            </button>
-            <button
-              onClick={() => { setRole('admin'); setError(''); }}
-              className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl transition-all duration-300 ${role === 'admin' ? 'bg-secondary text-primary shadow-sm font-bold scale-[1.02]' : 'text-gray-400 font-medium hover:text-gray-200'}`}
-            >
-              <ShieldCheck size={18} /> Admin
-            </button>
-          </div>
-        )}
+        <div className="flex p-1.5 bg-white/5 rounded-[1.25rem] mb-8">
+          <button
+            onClick={() => { setRole('leader'); setStep(0); setError(''); }}
+            className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl transition-all duration-300 ${role === 'leader' ? 'bg-secondary text-primary shadow-sm font-bold scale-[1.02]' : 'text-gray-400 font-medium hover:text-gray-200'}`}
+          >
+            <User size={18} /> Líder
+          </button>
+          <button
+            onClick={() => { setRole('admin'); setStep(0); setError(''); }}
+            className={`flex-1 flex items-center justify-center gap-2 py-3.5 rounded-2xl transition-all duration-300 ${role === 'admin' ? 'bg-secondary text-primary shadow-sm font-bold scale-[1.02]' : 'text-gray-400 font-medium hover:text-gray-200'}`}
+          >
+            <ShieldCheck size={18} /> Admin
+          </button>
+        </div>
 
         <div className="space-y-6">
           {role === 'leader' ? (
             <div className="space-y-4">
-              {step === 1 ? (
-                <div className="grid grid-cols-2 gap-3 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                  {[
-                    { id: 'Adulto', label: 'Adulto', icon: <Users size={20} /> },
-                    { id: 'Jovem', label: 'Jovem', icon: <Sparkles size={20} /> },
-                    { id: 'Juvenil', label: 'Juvenil', icon: <User size={20} /> },
-                    { id: 'Kids', label: 'Kids', icon: <Baby size={20} /> }
-                  ].map((type) => (
-                    <button
-                      key={type.id}
-                      onClick={() => { setSelectedType(type.id as CellType); setError(''); }}
-                      className={`flex flex-col items-center justify-center gap-3 p-6 rounded-[2rem] border-2 transition-all duration-300 ${selectedType === type.id ? 'bg-secondary/10 border-secondary text-secondary shadow-lg shadow-secondary/10' : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10 hover:text-gray-200'}`}
+              {step === 0 ? (
+                <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                  <label className="text-sm font-bold text-gray-400 ml-1">Tipo de Célula</label>
+                  <div className="relative group">
+                    <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none text-gray-400 group-focus-within:text-secondary transition-colors">
+                      <Layers size={18} />
+                    </div>
+                    <select
+                      value={selectedType}
+                      onChange={(e) => { setSelectedType(e.target.value as CellType); setError(''); }}
+                      className="w-full pl-11 pr-4 py-4 bg-white/5 text-white rounded-2xl border-none focus:ring-2 focus:ring-secondary/50 outline-none transition-all appearance-none font-bold cursor-pointer"
                     >
-                      <div className={`p-3 rounded-2xl ${selectedType === type.id ? 'bg-secondary text-primary' : 'bg-white/5'}`}>
+                      <option value="" className="bg-black">Escolha o tipo...</option>
+                      <option value="Adulto" className="bg-black text-white">Adulto</option>
+                      <option value="Jovem" className="bg-black text-white">Jovem</option>
+                      <option value="Juvenil" className="bg-black text-white">Juvenil</option>
+                      <option value="Kids" className="bg-black text-white">Kids</option>
+                    </select>
+                  </div>
+
+                  {/* Visual Quick Select for Types */}
+                  <div className="grid grid-cols-2 gap-3 mt-4">
+                    {[
+                      { id: 'Adulto', icon: <Users size={16} /> },
+                      { id: 'Jovem', icon: <Sparkles size={16} /> },
+                      { id: 'Juvenil', icon: <User size={16} /> },
+                      { id: 'Kids', icon: <Baby size={16} /> }
+                    ].map((type) => (
+                      <button
+                        key={type.id}
+                        type="button"
+                        onClick={() => { setSelectedType(type.id as CellType); setError(''); }}
+                        className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-200 ${selectedType === type.id ? 'bg-secondary/10 border-secondary text-secondary' : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'}`}
+                      >
                         {type.icon}
-                      </div>
-                      <span className="font-black uppercase text-[10px] tracking-widest">{type.label}</span>
-                    </button>
-                  ))}
+                        <span className="font-bold text-[10px] tracking-wider uppercase">{type.id}</span>
+                      </button>
+                    ))}
+                  </div>
                 </div>
-              ) : step === 2 ? (
+              ) : (
                 <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
                   <label className="text-sm font-bold text-gray-400 ml-1">Sua Célula ({selectedType})</label>
                   <div className="relative group">
@@ -124,13 +140,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
                       ))}
                     </select>
                   </div>
-                </div>
-              ) : (
-                <div className="py-8 text-center animate-in fade-in duration-500">
-                  <div className="w-20 h-20 bg-secondary/10 text-secondary rounded-[2rem] flex items-center justify-center mx-auto mb-4 border border-secondary/20 shadow-lg">
-                    <User size={32} />
-                  </div>
-                  <p className="text-gray-400 font-bold text-sm">Clique no botão abaixo para iniciar</p>
                 </div>
               )}
             </div>
@@ -203,7 +212,7 @@ const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
               onClick={handleLogin}
               className="flex-1 py-6 bg-secondary hover:bg-secondary/90 text-primary rounded-2xl font-black text-xl flex items-center justify-center gap-3 transition-all shadow-xl shadow-secondary/20 group active:scale-[0.98] ring-offset-2 ring-offset-black focus:ring-4 focus:ring-secondary/20"
             >
-              {role === 'leader' && step < 2 ? 'Continuar' : 'Acessar Sistema'}
+              {role === 'leader' && step < 1 ? 'Continuar' : 'Acessar Sistema'}
               <ArrowRight size={24} className="group-hover:translate-x-1 transition-transform" />
             </button>
           </div>
