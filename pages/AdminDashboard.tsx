@@ -588,17 +588,6 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         </div>
                       </div>
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Total de Crianças</label>
-                          <input type="number" value={cellFormData.initialChildrenCount || ''} onChange={e => setCellFormData({ ...cellFormData, initialChildrenCount: parseInt(e.target.value) || 0 })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
-                        </div>
-                        <div className="space-y-1">
-                          <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Oferta Kids</label>
-                          <input type="number" step="0.01" value={cellFormData.initialKidsOffering || ''} onChange={e => setCellFormData({ ...cellFormData, initialKidsOffering: parseFloat(e.target.value) || 0 })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" />
-                        </div>
-                      </div>
-
                       <div className="pt-4 border-t border-gray-100">
                         <label className="text-[10px] font-black text-gray-400 uppercase ml-1">Trocar Tipo (Apenas se necessário)</label>
                         <select value={cellFormData.type} onChange={e => setCellFormData({ ...cellFormData, type: e.target.value as any })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none">
