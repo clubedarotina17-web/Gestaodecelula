@@ -181,15 +181,19 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const [hours, minutes] = (cell.time || '20:00').split(':').map(Number);
       lastMeetingDate.setHours(hours, minutes, 0, 0);
 
-      const timeSinceMeeting = today.getTime() - lastMeetingDate.getTime();
-      const isOver24h = timeSinceMeeting >= (24 * 60 * 60 * 1000);
+      let timeSinceMeeting = today.getTime() - lastMeetingDate.getTime();
 
-      if (isOver24h) {
-        const dateStr = getLocalDateString(lastMeetingDate);
-        if (cell.dismissedLateDate === dateStr) return;
-        const hasReport = (reports || []).some(r => r.cellId === cell.id && r.date === dateStr);
-        if (!hasReport) results.push({ cell, dateStr });
+      // Se a reunião identificada for hoje/futura ou ainda não tiver 24h de atraso,
+      // buscamos a reunião da semana anterior.
+      if (timeSinceMeeting < 24 * 60 * 60 * 1000) {
+        lastMeetingDate.setDate(lastMeetingDate.getDate() - 7);
+        timeSinceMeeting = today.getTime() - lastMeetingDate.getTime();
       }
+
+      const dateStr = getLocalDateString(lastMeetingDate);
+      if (cell.dismissedLateDate === dateStr) return;
+      const hasReport = (reports || []).some(r => r.cellId === cell.id && r.date === dateStr);
+      if (!hasReport) results.push({ cell, dateStr });
     });
 
     return results;
@@ -217,15 +221,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
       const [hours, minutes] = (cell.time || '20:00').split(':').map(Number);
       lastMeetingDate.setHours(hours, minutes, 0, 0);
 
-      const timeSinceMeeting = today.getTime() - lastMeetingDate.getTime();
-      const isOver24h = timeSinceMeeting >= (24 * 60 * 60 * 1000);
+      let timeSinceMeeting = today.getTime() - lastMeetingDate.getTime();
 
-      if (isOver24h) {
-        const dateStr = getLocalDateString(lastMeetingDate);
-        if (cell.dismissedLateDate === dateStr) return;
-        const hasReport = (reports || []).some(r => r.cellId === cell.id && r.date === dateStr);
-        if (!hasReport) results.push({ cell, dateStr });
+      // Mesma lógica: se a reunião atual ainda não "venceu" 24h, olha para a semana passada
+      if (timeSinceMeeting < 24 * 60 * 60 * 1000) {
+        lastMeetingDate.setDate(lastMeetingDate.getDate() - 7);
+        timeSinceMeeting = today.getTime() - lastMeetingDate.getTime();
       }
+
+      const dateStr = getLocalDateString(lastMeetingDate);
+      if (cell.dismissedLateDate === dateStr) return;
+      const hasReport = (reports || []).some(r => r.cellId === cell.id && r.date === dateStr);
+      if (!hasReport) results.push({ cell, dateStr });
     });
 
     return results;
