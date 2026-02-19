@@ -628,7 +628,7 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                     </div>
 
                     {/* Detalhes dos Visitantes de 1ª Vez */}
-                    {report.firstTimeVisitorsList && report.firstTimeVisitorsList.length > 0 && (
+                    {cell.type !== 'Kids' && report.firstTimeVisitorsList && report.firstTimeVisitorsList.length > 0 && (
                       <div className="pt-4 border-t border-gray-100">
                         <p className="text-[9px] font-black text-amber-600 uppercase tracking-widest mb-3 flex items-center gap-1">
                           <Sparkles size={12} /> Visitantes de 1ª Vez Cadastrados
