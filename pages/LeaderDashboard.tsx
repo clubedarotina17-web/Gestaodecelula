@@ -388,18 +388,22 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                     className={`w-full p-3.5 bg-gray-50 border rounded-xl outline-none focus:border-secondary text-sm font-medium ${isDuplicateDate ? 'border-red-200 text-red-500' : 'border-gray-50'}`}
                   />
                 </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-gray-700 ml-1">Total Presentes</label>
-                  <input type="number" required min="0" placeholder="0" value={formData.attendance} onChange={(e) => setFormData({ ...formData, attendance: e.target.value })} className="w-full p-3.5 bg-gray-50 border border-gray-50 rounded-xl outline-none focus:border-secondary text-sm font-bold" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-gray-700 ml-1">Visitantes (Total)</label>
-                  <input type="number" required min="0" placeholder="0" value={formData.visitors} onChange={(e) => setFormData({ ...formData, visitors: e.target.value })} className="w-full p-3.5 bg-gray-50 border border-gray-50 rounded-xl outline-none focus:border-secondary text-sm font-medium" />
-                </div>
-                <div className="space-y-1">
-                  <label className="text-[11px] font-bold text-secondary ml-1">Visitantes (Pela 1ª vez)</label>
-                  <input type="number" min="0" placeholder="0" value={formData.firstTimeVisitorsCount} onChange={(e) => handleFirstTimeCountChange(e.target.value)} className="w-full p-3.5 bg-white border-2 border-secondary/10 rounded-xl outline-none focus:border-secondary text-sm font-bold" />
-                </div>
+                {cell.type !== 'Kids' && (
+                  <>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-gray-700 ml-1">Total Presentes</label>
+                      <input type="number" required min="0" placeholder="0" value={formData.attendance} onChange={(e) => setFormData({ ...formData, attendance: e.target.value })} className="w-full p-3.5 bg-gray-50 border border-gray-50 rounded-xl outline-none focus:border-secondary text-sm font-bold" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-gray-700 ml-1">Visitantes (Total)</label>
+                      <input type="number" required min="0" placeholder="0" value={formData.visitors} onChange={(e) => setFormData({ ...formData, visitors: e.target.value })} className="w-full p-3.5 bg-gray-50 border border-gray-50 rounded-xl outline-none focus:border-secondary text-sm font-medium" />
+                    </div>
+                    <div className="space-y-1">
+                      <label className="text-[11px] font-bold text-secondary ml-1">Visitantes (Pela 1ª vez)</label>
+                      <input type="number" min="0" placeholder="0" value={formData.firstTimeVisitorsCount} onChange={(e) => handleFirstTimeCountChange(e.target.value)} className="w-full p-3.5 bg-white border-2 border-secondary/10 rounded-xl outline-none focus:border-secondary text-sm font-bold" />
+                    </div>
+                  </>
+                )}
                 {firstTimeVisitors.length > 0 && (
                   <div className="col-span-full space-y-3 py-2">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -498,14 +502,20 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                     </div>
                   </div>
                 )}
-                <div className="space-y-1"><label className="text-[11px] font-bold text-gray-700 ml-1">Conversões</label><input type="number" min="0" placeholder="0" value={formData.conversions} onChange={(e) => setFormData({ ...formData, conversions: e.target.value })} className="w-full p-3.5 bg-gray-50 border-none rounded-xl text-sm font-medium" /></div>
-                <div className="space-y-1"><label className="text-[11px] font-bold text-gray-700 ml-1">Visitas</label><input type="number" min="0" placeholder="0" value={formData.weeklyVisits} onChange={(e) => setFormData({ ...formData, weeklyVisits: e.target.value })} className="w-full p-3.5 bg-gray-50 border-none rounded-xl text-sm font-bold" /></div>
+                {cell.type !== 'Kids' && (
+                  <>
+                    <div className="space-y-1"><label className="text-[11px] font-bold text-gray-700 ml-1">Conversões</label><input type="number" min="0" placeholder="0" value={formData.conversions} onChange={(e) => setFormData({ ...formData, conversions: e.target.value })} className="w-full p-3.5 bg-gray-50 border-none rounded-xl text-sm font-medium" /></div>
+                    <div className="space-y-1"><label className="text-[11px] font-bold text-gray-700 ml-1">Visitas</label><input type="number" min="0" placeholder="0" value={formData.weeklyVisits} onChange={(e) => setFormData({ ...formData, weeklyVisits: e.target.value })} className="w-full p-3.5 bg-gray-50 border-none rounded-xl text-sm font-bold" /></div>
+                  </>
+                )}
 
                 {!isJovemOuJuvenil && (
                   <div className="space-y-1"><label className="text-[11px] font-bold text-blue-500 ml-1">Crianças (Total)</label><input type="number" min="0" placeholder="0" value={formData.childrenCount} onChange={(e) => setFormData({ ...formData, childrenCount: e.target.value })} className="w-full p-3.5 bg-white border-2 border-blue-50 rounded-xl outline-none focus:border-blue-400 text-sm font-bold" /></div>
                 )}
 
-                <div className="space-y-1"><label className="text-[11px] font-bold text-gray-700 ml-1">Oferta (R$)</label><input type="number" min="0" step="0.01" value={formData.offering} onChange={(e) => setFormData({ ...formData, offering: e.target.value })} className="w-full p-3.5 bg-gray-50 border-none rounded-xl text-sm font-bold" /></div>
+                {cell.type !== 'Kids' && (
+                  <div className="space-y-1"><label className="text-[11px] font-bold text-gray-700 ml-1">Oferta (R$)</label><input type="number" min="0" step="0.01" value={formData.offering} onChange={(e) => setFormData({ ...formData, offering: e.target.value })} className="w-full p-3.5 bg-gray-50 border-none rounded-xl text-sm font-bold" /></div>
+                )}
 
                 {!isJovemOuJuvenil && (
                   <div className="space-y-1"><label className="text-[11px] font-bold text-blue-500 ml-1">Oferta Kids (R$)</label><input type="number" min="0" step="0.01" placeholder="0.00" value={formData.kidsOffering} onChange={(e) => setFormData({ ...formData, kidsOffering: e.target.value })} className="w-full p-3.5 bg-white border-2 border-blue-50 rounded-xl outline-none focus:border-blue-400 text-sm font-bold" /></div>

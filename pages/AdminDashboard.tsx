@@ -282,7 +282,10 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
   const kidsMetrics = useMemo(() => {
     const kidsReports = (reports || []).filter(r => {
       const cell = cells.find(c => c.id === r.cellId);
-      return cell?.type === 'Kids';
+      if (cell?.type !== 'Kids') return false;
+
+      const reportDate = new Date(r.date + 'T12:00:00');
+      return checkPeriodMatch(reportDate, reportFilterPeriod, reportFilterYear);
     }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
 
     const totals = kidsReports.reduce((acc, r) => ({
@@ -769,7 +772,13 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
       {activeTab === 'admin-rede-kids' && (
         <div className="space-y-10 max-w-6xl mx-auto px-4">
-          <div><h3 className="text-3xl font-black text-primary uppercase tracking-tighter">Rede Kids</h3><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Métricas exclusivas do ministério infantil</p></div>
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
+            <div><h3 className="text-3xl font-black text-primary uppercase tracking-tighter">Rede Kids</h3><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Métricas exclusivas do ministério infantil</p></div>
+            <div className="bg-white p-3 rounded-[1.5rem] shadow-sm border border-gray-100 flex flex-wrap items-center gap-4">
+              <div className="flex items-center gap-2 px-2 border-r border-gray-100"><Clock size={16} className="text-secondary" /><select value={reportFilterPeriod} onChange={e => setReportFilterPeriod(e.target.value)} className="text-[10px] font-black uppercase outline-none bg-transparent appearance-none pr-4"><option value="all">Período (Todos)</option><option value="week">Esta Semana</option><option value="month">Este Mês</option><option value="bimester">Este Bimestre</option><option value="quarter">Este Trimestre</option><option value="semester">Este Semestre</option><option value="year">Anual</option></select></div>
+              <div className="flex items-center gap-2 px-2"><Calendar size={16} className="text-secondary" /><select value={reportFilterYear} onChange={e => setReportFilterYear(e.target.value)} className="text-[10px] font-black uppercase outline-none bg-transparent appearance-none pr-4"><option value="all">Ano (Todos)</option>{years.map(y => <option key={y} value={y}>{y}</option>)}</select></div>
+            </div>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="bg-white p-8 rounded-[2.5rem] border border-gray-50 shadow-sm hover:shadow-md transition-shadow"><div className="flex items-center gap-3 mb-4 text-secondary"><Baby size={24} /><p className="text-xs font-black uppercase tracking-widest">Total de Crianças</p></div><p className="text-5xl font-black text-primary tracking-tighter">{kidsMetrics.totals.children}</p></div>
             <div className="bg-primary p-8 rounded-[2.5rem] text-white shadow-xl shadow-black/20 group hover:scale-[1.02] transition-transform"><div className="flex items-center gap-3 mb-4 text-secondary"><Coins size={24} /><p className="text-xs font-black uppercase tracking-widest">Oferta Kids Acumulada</p></div><p className="text-4xl font-black tracking-tighter">R$ {kidsMetrics.totals.offering.toFixed(2)}</p></div>
