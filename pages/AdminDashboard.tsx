@@ -411,6 +411,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                   <option value="Adulto">Adulto</option>
                   <option value="Jovem">Jovem</option>
                   <option value="Juvenil">Juvenil</option>
+                  <option value="Kids">Kids</option>
                 </select>
               </div>
               <div className="flex items-center gap-2 px-3 border-r border-gray-100 h-10">
@@ -549,7 +550,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       </div>
                     </div>
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-                      <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Tipo</label><select value={cellFormData.type} onChange={e => setCellFormData({ ...cellFormData, type: e.target.value as any })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none"><option value="Adulto">Adulto</option><option value="Jovem">Jovem</option><option value="Juvenil">Juvenil</option></select></div>
+                      <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Tipo</label><select value={cellFormData.type} onChange={e => setCellFormData({ ...cellFormData, type: e.target.value as any })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold appearance-none"><option value="Adulto">Adulto</option><option value="Jovem">Jovem</option><option value="Juvenil">Juvenil</option><option value="Kids">Kids</option></select></div>
                       <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Telefone Líder</label><input type="text" value={cellFormData.phone} onChange={e => setCellFormData({ ...cellFormData, phone: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
                       <div className="space-y-1"><label className="text-[10px] font-black text-gray-400 uppercase ml-1">Líder em Treinamento</label><input type="text" value={cellFormData.trainee} onChange={e => setCellFormData({ ...cellFormData, trainee: e.target.value })} className="w-full p-4 bg-gray-50 border border-gray-100 rounded-2xl outline-none focus:border-secondary font-bold" /></div>
                     </div>
@@ -614,7 +615,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
           <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-2">
             <div><h3 className="text-3xl font-black text-primary uppercase tracking-tighter">Dashboard de Métricas</h3><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Dados consolidados da rede Viver em Cristo</p></div>
             <div className="bg-white p-3 rounded-[1.5rem] shadow-sm border border-gray-100 flex flex-wrap items-center gap-4">
-              <div className="flex items-center gap-2 px-2 border-r border-gray-100"><Layers size={16} className="text-secondary" /><select value={filterType} onChange={e => { setFilterType(e.target.value as any); setFilterCell('Todas'); }} className="text-[10px] font-black uppercase outline-none bg-transparent appearance-none pr-4"><option value="Todas">Tipo (Todas)</option><option value="Adulto">Adulto</option><option value="Jovem">Jovem</option><option value="Juvenil">Juvenil</option></select></div>
+              <div className="flex items-center gap-2 px-2 border-r border-gray-100"><Layers size={16} className="text-secondary" /><select value={filterType} onChange={e => { setFilterType(e.target.value as any); setFilterCell('Todas'); }} className="text-[10px] font-black uppercase outline-none bg-transparent appearance-none pr-4"><option value="Todas">Tipo (Todas)</option><option value="Adulto">Adulto</option><option value="Jovem">Jovem</option><option value="Juvenil">Juvenil</option><option value="Kids">Kids</option></select></div>
               <div className="flex items-center gap-2 px-2 border-r border-gray-100"><MapPin size={16} className="text-secondary" /><select value={filterCell} onChange={e => setFilterCell(e.target.value)} className="text-[10px] font-black uppercase outline-none bg-transparent appearance-none pr-4"><option value="Todas">Célula (Todas)</option>{cells.filter(c => filterType === 'Todas' || c.type === filterType).map(c => (<option key={c.id} value={c.name}>{c.name}</option>))}</select></div>
               <div className="flex items-center gap-2 px-2 border-r border-gray-100"><Clock size={16} className="text-secondary" /><select value={reportFilterPeriod} onChange={e => setReportFilterPeriod(e.target.value)} className="text-[10px] font-black uppercase outline-none bg-transparent appearance-none pr-4"><option value="all">Período (Todos)</option><option value="week">Esta Semana</option><option value="month">Este Mês</option><option value="bimester">Este Bimestre</option><option value="quarter">Este Trimestre</option><option value="semester">Este Semestre</option><option value="year">Anual</option></select></div>
               <div className="flex items-center gap-2 px-2"><Calendar size={16} className="text-secondary" /><select value={reportFilterYear} onChange={e => setReportFilterYear(e.target.value)} className="text-[10px] font-black uppercase outline-none bg-transparent appearance-none pr-4"><option value="all">Ano (Todos)</option>{years.map(y => <option key={y} value={y}>{y}</option>)}</select></div>
@@ -703,6 +704,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                         <option value="Adulto">Adulto</option>
                         <option value="Jovem">Jovem</option>
                         <option value="Juvenil">Juvenil</option>
+                        <option value="Kids">Kids</option>
                       </select>
                     </div>
                     <div className="space-y-1">

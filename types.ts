@@ -1,5 +1,5 @@
 
-export type CellType = 'Adulto' | 'Jovem' | 'Juvenil';
+export type CellType = 'Adulto' | 'Jovem' | 'Juvenil' | 'Kids';
 
 export interface Visitor {
   name: string;
