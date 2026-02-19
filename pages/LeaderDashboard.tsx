@@ -608,15 +608,23 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                   <div className="p-6 space-y-6">
                     <p className="text-sm text-gray-600 font-bold italic border-l-4 border-secondary/20 pl-4">"{report.summary || 'Sem resumo.'}"</p>
                     <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-9 gap-3">
-                      <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Total Presentes</p><p className="text-sm font-black">{report.attendance}</p></div>
-                      <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Visitantes</p><p className="text-sm font-black">{report.visitors}</p></div>
-                      <div className="p-3 bg-amber-50 rounded-2xl border border-amber-100"><p className="text-[8px] font-black text-amber-600 uppercase">1ª Vez</p><p className="text-sm font-black">{report.firstTimeVisitorsCount || 0}</p></div>
-                      <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p className="text-[8px] font-black text-blue-500 uppercase">Crianças</p><p className="text-sm font-black">{report.childrenCount || 0}</p></div>
-                      <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Conversões</p><p className="text-sm font-black">{report.conversions}</p></div>
-                      <div className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100"><p className="text-[8px] font-black text-indigo-600 uppercase">Visitas</p><p className="text-sm font-black">{report.weeklyVisits || 0}</p></div>
-                      <div className="p-3 bg-green-50 rounded-2xl border border-green-100"><p className="text-[8px] font-black text-green-500 uppercase">Oferta</p><p className="text-sm font-black text-green-700">R${report.offering.toFixed(2)}</p></div>
-                      <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p className="text-[8px] font-black text-blue-500 uppercase">Oferta Kids</p><p className="text-sm font-black text-blue-700">R${(report.kidsOffering || 0).toFixed(2)}</p></div>
+                      {cell.type !== 'Kids' && (
+                        <>
+                          <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Total Presentes</p><p className="text-sm font-black">{report.attendance}</p></div>
+                          <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Visitantes</p><p className="text-sm font-black">{report.visitors}</p></div>
+                          <div className="p-3 bg-amber-50 rounded-2xl border border-amber-100"><p className="text-[8px] font-black text-amber-600 uppercase">1ª Vez</p><p className="text-sm font-black">{report.firstTimeVisitorsCount || 0}</p></div>
+                          <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Conversões</p><p className="text-sm font-black">{report.conversions}</p></div>
+                          <div className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100"><p className="text-[8px] font-black text-indigo-600 uppercase">Visitas</p><p className="text-sm font-black">{report.weeklyVisits || 0}</p></div>
+                          <div className="p-3 bg-green-50 rounded-2xl border border-green-100"><p className="text-[8px] font-black text-green-500 uppercase">Oferta</p><p className="text-sm font-black text-green-700">R${report.offering.toFixed(2)}</p></div>
+                        </>
+                      )}
 
+                      {cell.type === 'Kids' && (
+                        <>
+                          <div className="p-4 bg-blue-50 rounded-2xl border border-blue-100 min-w-[140px]"><p className="text-[9px] font-black text-blue-500 uppercase mb-1 tracking-widest">Crianças</p><p className="text-2xl font-black text-primary">{report.childrenCount || 0}</p></div>
+                          <div className="p-4 bg-green-50 rounded-2xl border border-green-100 min-w-[140px]"><p className="text-[9px] font-black text-green-500 uppercase mb-1 tracking-widest">Oferta Kids</p><p className="text-xl font-black text-green-700">R$ {(report.kidsOffering || 0).toFixed(2)}</p></div>
+                        </>
+                      )}
                     </div>
 
                     {/* Detalhes dos Visitantes de 1ª Vez */}

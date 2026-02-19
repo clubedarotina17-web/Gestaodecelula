@@ -567,11 +567,9 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                       <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Total Presentes</p><p className="text-sm font-black">{report.attendance}</p></div>
                       <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Visitantes</p><p className="text-sm font-black">{report.visitors}</p></div>
                       <div className="p-3 bg-amber-50 rounded-2xl border border-amber-100"><p className="text-[8px] font-black text-amber-600 uppercase">1ª Vez</p><p className="text-sm font-black">{report.firstTimeVisitorsCount || 0}</p></div>
-                      <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p className="text-[8px] font-black text-blue-500 uppercase">Crianças</p><p className="text-sm font-black">{report.childrenCount || 0}</p></div>
                       <div className="p-3 bg-gray-50 rounded-2xl border border-gray-100"><p className="text-[8px] font-black text-gray-400 uppercase">Conversões</p><p className="text-sm font-black">{report.conversions}</p></div>
                       <div className="p-3 bg-indigo-50 rounded-2xl border border-indigo-100"><p className="text-[8px] font-black text-indigo-600 uppercase">Visitas</p><p className="text-sm font-black">{report.weeklyVisits || 0}</p></div>
                       <div className="p-3 bg-green-50 rounded-2xl border border-green-100"><p className="text-[8px] font-black text-green-500 uppercase">Oferta</p><p className="text-sm font-black text-green-700">R${report.offering.toFixed(2)}</p></div>
-                      <div className="p-3 bg-blue-50 rounded-2xl border border-blue-100"><p className="text-[8px] font-black text-blue-500 uppercase">Oferta Kids</p><p className="text-sm font-black text-blue-700">R${(report.kidsOffering || 0).toFixed(2)}</p></div>
 
                     </div>
                     {report.firstTimeVisitorsList && report.firstTimeVisitorsList.length > 0 && (
