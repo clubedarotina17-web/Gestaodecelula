@@ -101,26 +101,6 @@ const Login: React.FC<LoginProps> = ({ onLogin, cells }) => {
                       <option value="Kids" className="bg-black text-white">Kids</option>
                     </select>
                   </div>
-
-                  {/* Visual Quick Select for Types */}
-                  <div className="grid grid-cols-2 gap-3 mt-4">
-                    {[
-                      { id: 'Adulto', icon: <Users size={16} /> },
-                      { id: 'Jovem', icon: <Sparkles size={16} /> },
-                      { id: 'Juvenil', icon: <User size={16} /> },
-                      { id: 'Kids', icon: <Baby size={16} /> }
-                    ].map((type) => (
-                      <button
-                        key={type.id}
-                        type="button"
-                        onClick={() => { setSelectedType(type.id as CellType); setError(''); }}
-                        className={`flex items-center gap-3 p-4 rounded-xl border transition-all duration-200 ${selectedType === type.id ? 'bg-secondary/10 border-secondary text-secondary' : 'bg-white/5 border-transparent text-gray-400 hover:bg-white/10'}`}
-                      >
-                        {type.icon}
-                        <span className="font-bold text-[10px] tracking-wider uppercase">{type.id}</span>
-                      </button>
-                    ))}
-                  </div>
                 </div>
               ) : (
                 <div className="space-y-2 animate-in fade-in slide-in-from-bottom-4 duration-500">
