@@ -10,7 +10,7 @@ import {
 } from 'lucide-react';
 import { Cell as CellTypeData, Report, Share, Baptism, CellType, Visitor, Goal, AppEvent } from '../types';
 import {
-  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer,
+  BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart,
   PieChart as RePieChart, Pie, Cell as ReCell, Legend, LineChart, Line, ComposedChart, Area
 } from 'recharts';
 
@@ -278,6 +278,31 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
 
     return { totals, comparisonData, visitorProfileData, baptizedPieData, encounterPieData, attentionLevels, totalPeople };
   }, [reports, cells, filterCell, filterType, reportFilterPeriod, reportFilterYear]);
+
+  const kidsMetrics = useMemo(() => {
+    const kidsReports = (reports || []).filter(r => {
+      const cell = cells.find(c => c.id === r.cellId);
+      return cell?.type === 'Kids';
+    }).sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+    const totals = kidsReports.reduce((acc, r) => ({
+      children: acc.children + (r.childrenCount || 0),
+      offering: acc.offering + (r.kidsOffering || 0)
+    }), { children: 0, offering: 0 });
+
+    // Growth chart data: group by date
+    const growthDataMap: Record<string, number> = {};
+    kidsReports.forEach(r => {
+      growthDataMap[r.date] = (growthDataMap[r.date] || 0) + (r.childrenCount || 0);
+    });
+
+    const growthData = Object.keys(growthDataMap).sort().map(date => ({
+      date: new Date(date + 'T12:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: '2-digit' }),
+      children: growthDataMap[date]
+    }));
+
+    return { totals, growthData };
+  }, [reports, cells]);
 
   const COLORS = ['#00b4bc', '#000000', '#050426', '#10b981'];
   const CONSOLIDATION_COLORS = ['#6366f1', '#f59e0b'];
@@ -739,6 +764,36 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
             <div className="bg-white p-6 md:p-8 rounded-[3rem] border border-gray-100 shadow-sm"><h4 className="text-xs font-black uppercase text-gray-400 mb-8 tracking-widest flex items-center gap-2"><Footprints size={14} /> Consolidação: Encontro</h4><div className="h-56 md:h-64 w-full"><ResponsiveContainer width="100%" height="100%"><RePieChart><Pie data={metricsData.encounterPieData} cx="50%" cy="50%" innerRadius={40} outerRadius={70} paddingAngle={2} dataKey="value">{metricsData.encounterPieData.map((entry, index) => <ReCell key={`cell-enc-${index}`} fill={CONSOLIDATION_COLORS[index % CONSOLIDATION_COLORS.length]} />)}</Pie><Tooltip contentStyle={{ borderRadius: '12px', border: 'none' }} /><Legend iconType="circle" verticalAlign="bottom" align="center" wrapperStyle={{ fontSize: '9px', fontWeight: 'bold', textTransform: 'uppercase', paddingTop: '10px' }} /></RePieChart></ResponsiveContainer></div></div>
           </div>
           <div className="bg-white p-6 md:p-10 rounded-[3rem] border border-gray-100 shadow-sm"><div className="flex items-center gap-3 mb-8"><Activity className="text-secondary" size={28} /><div><h4 className="text-xl font-black text-primary uppercase tracking-tighter">Análise de Nível de Atenção</h4><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Status baseado na regularidade de visitantes</p></div></div><div className="space-y-4">{metricsData.attentionLevels.map((cell, idx) => (<div key={idx} className="bg-gray-50/50 rounded-3xl p-6 border border-gray-100 flex flex-col md:flex-row md:items-center justify-between gap-6 hover:bg-white hover:shadow-xl hover:shadow-black/5 transition-all group"><div className="flex-1 space-y-2"><div className="flex items-center gap-3"><p className="font-black text-primary uppercase text-sm md:text-base leading-tight tracking-tight">{cell.name}</p><span className={`px-3 py-1 rounded-full text-[8px] font-black uppercase tracking-[0.15em] border ${cell.bgColor} ${cell.color} border-current/20`}>{cell.label}</span></div><p className="text-xs font-bold text-gray-500 leading-relaxed"><span className="text-primary/40 font-black uppercase text-[9px] tracking-wider block mb-1">Análise Automática</span>{cell.reason}</p></div><div className="flex items-center gap-6 md:border-l border-gray-200 md:pl-8"><div className="text-center"><p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Média Visitantes</p><div className="flex items-baseline justify-center gap-1"><p className="text-xl font-black text-primary tracking-tighter">{cell.avgVisitors.toFixed(1)}</p><span className="text-[8px] font-bold text-gray-400 uppercase">/sem</span></div></div><div className="text-center"><p className="text-[9px] font-black text-gray-400 uppercase tracking-widest mb-1">Média Frequência</p><div className="flex items-baseline justify-center gap-1"><p className="text-xl font-black text-secondary tracking-tighter">{cell.avgAttendance.toFixed(1)}</p><span className="text-[8px] font-bold text-gray-400 uppercase">/sem</span></div></div></div></div>))}{metricsData.attentionLevels.length === 0 && (<div className="text-center py-12 border-2 border-dashed border-gray-100 rounded-3xl"><AlertCircle size={32} className="mx-auto text-gray-300 mb-2" /><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Sem dados para análise no período selecionado</p></div>)}</div></div>
+        </div>
+      )}
+
+      {activeTab === 'admin-rede-kids' && (
+        <div className="space-y-10 max-w-6xl mx-auto px-4">
+          <div><h3 className="text-3xl font-black text-primary uppercase tracking-tighter">Rede Kids</h3><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Métricas exclusivas do ministério infantil</p></div>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white p-8 rounded-[2.5rem] border border-gray-50 shadow-sm hover:shadow-md transition-shadow"><div className="flex items-center gap-3 mb-4 text-secondary"><Baby size={24} /><p className="text-xs font-black uppercase tracking-widest">Total de Crianças</p></div><p className="text-5xl font-black text-primary tracking-tighter">{kidsMetrics.totals.children}</p></div>
+            <div className="bg-primary p-8 rounded-[2.5rem] text-white shadow-xl shadow-black/20 group hover:scale-[1.02] transition-transform"><div className="flex items-center gap-3 mb-4 text-secondary"><Coins size={24} /><p className="text-xs font-black uppercase tracking-widest">Oferta Kids Acumulada</p></div><p className="text-4xl font-black tracking-tighter">R$ {kidsMetrics.totals.offering.toFixed(2)}</p></div>
+          </div>
+          <div className="bg-white p-8 md:p-10 rounded-[3rem] border border-gray-100 shadow-sm">
+            <div className="flex items-center gap-3 mb-8"><TrendingUp className="text-secondary" size={28} /><div><h4 className="text-xl font-black text-primary uppercase tracking-tighter">Gráfico de Crescimento</h4><p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mt-1">Evolução do número de crianças nos encontros</p></div></div>
+            <div className="h-80 w-full mt-8">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={kidsMetrics.growthData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="colorKids" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#00b4bc" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#00b4bc" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f0f0f0" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#9ca3af' }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fontSize: 10, fontWeight: 'bold', fill: '#9ca3af' }} />
+                  <Tooltip contentStyle={{ borderRadius: '16px', border: 'none', boxShadow: '0 20px 25px -5px rgba(0,0,0,0.1)' }} labelStyle={{ fontWeight: 'black', textTransform: 'uppercase', fontSize: '10px', color: '#00b4bc', marginBottom: '4px' }} />
+                  <Area type="monotone" dataKey="children" stroke="#00b4bc" strokeWidth={4} fillOpacity={1} fill="url(#colorKids)" name="Crianças" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
         </div>
       )}
 

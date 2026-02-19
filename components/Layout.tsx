@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { Menu, X, LogOut, ChevronRight, FileText, Share2, Users, PieChart, Droplets, MapPin, Bell, MessageCircle, Trash2, Megaphone, Target, Cloud, CloudOff, Calendar } from 'lucide-react';
+import { Menu, X, LogOut, ChevronRight, FileText, Share2, Users, PieChart, Droplets, MapPin, Bell, MessageCircle, Trash2, Megaphone, Target, Cloud, CloudOff, Calendar, Baby } from 'lucide-react';
 import { UserRole, AppNotification } from '../types';
 
 interface LayoutProps {
@@ -36,6 +36,7 @@ const Layout: React.FC<LayoutProps> = ({ children, role, onLogout, activeTab, se
     { id: 'admin-celulas', label: 'Nossas Células', icon: <MapPin size={20} /> },
     { id: 'admin-metricas', label: 'Métricas', icon: <PieChart size={20} /> },
     { id: 'admin-metas', label: 'Metas', icon: <Target size={20} /> },
+    { id: 'admin-rede-kids', label: 'Rede Kids', icon: <Baby size={20} /> },
     { id: 'admin-avisos', label: 'Avisos', icon: <Megaphone size={20} /> },
   ];
 
