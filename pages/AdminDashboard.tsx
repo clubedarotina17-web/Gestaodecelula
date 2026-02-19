@@ -668,7 +668,18 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                 <div className="w-24 h-24 bg-gray-50 rounded-[1.75rem] flex items-center justify-center mb-6 shadow-inner border border-gray-100 overflow-hidden">{cell.leaderPhoto ? <img src={cell.leaderPhoto} className="w-full h-full object-cover" alt={cell.leader} /> : <MapPin className="text-secondary" size={40} />}</div>
                 <h4 className="font-black text-primary text-xl uppercase leading-tight mb-1">{cell.name}</h4><p className="text-[10px] font-black text-secondary uppercase tracking-[0.2em] mb-4">{cell.type}</p>
                 <div className="space-y-2 text-[10px] text-gray-500 font-bold uppercase">
-                  <div className="flex items-center gap-2"><User size={14} className="text-secondary shrink-0" /> Líder: {cell.leader}</div>{cell.trainee && <div className="flex items-center gap-2"><GraduationCap size={14} className="text-secondary shrink-0" /> Líder em treinamento: {cell.trainee}</div>}<div className="flex items-center gap-2"><Home size={14} className="text-secondary shrink-0" /> Anfitrião: {cell.host || 'Não inf.'}</div>{cell.secretary && <div className="flex items-center gap-2"><PenTool size={14} className="text-secondary shrink-0" /> Secretária: {cell.secretary}</div>}<div className="flex items-center gap-2"><MapPin size={14} className="text-secondary shrink-0" /> End.: {cell.address}</div><div className="flex items-center gap-2"><Clock size={14} className="text-secondary shrink-0" /> {cell.day} às {cell.time}</div><div className="flex items-start gap-2"><Users size={14} className="text-secondary shrink-0 mt-0.5" /><div>Equipe: {cell.team?.length || 0} pessoas<div className="flex flex-wrap gap-1 mt-1">{cell.team?.map((m, i) => (<span key={i} className="bg-gray-100 text-[8px] px-1.5 py-0.5 rounded text-gray-600">{m}</span>))}</div></div></div>
+                  <div className="flex items-center gap-2"><User size={14} className="text-secondary shrink-0" /> {cell.type === 'Kids' ? 'Líder Kids' : 'Líder'}: {cell.leader}</div>
+                  {cell.trainee && <div className="flex items-center gap-2"><GraduationCap size={14} className="text-secondary shrink-0" /> {cell.type === 'Kids' ? 'Líder Kids em treinamento' : 'Líder em treinamento'}: {cell.trainee}</div>}
+                  {cell.type === 'Kids' && cell.parentAdultCellId && (
+                    <div className="flex items-center gap-2"><Layers size={14} className="text-secondary shrink-0" /> Célula Mãe: {cells.find(c => c.id === cell.parentAdultCellId)?.name || 'Carregando...'}</div>
+                  )}
+                  {cell.type !== 'Kids' && <div className="flex items-center gap-2"><Home size={14} className="text-secondary shrink-0" /> Anfitrião: {cell.host || 'Não inf.'}</div>}
+                  {cell.secretary && <div className="flex items-center gap-2"><PenTool size={14} className="text-secondary shrink-0" /> Secretária: {cell.secretary}</div>}
+                  {cell.type !== 'Kids' && <div className="flex items-center gap-2"><MapPin size={14} className="text-secondary shrink-0" /> End.: {cell.address}</div>}
+                  <div className="flex items-center gap-2"><Clock size={14} className="text-secondary shrink-0" /> {cell.day} às {cell.time}</div>
+                  {cell.type !== 'Kids' && (
+                    <div className="flex items-start gap-2"><Users size={14} className="text-secondary shrink-0 mt-0.5" /><div>Equipe: {cell.team?.length || 0} pessoas<div className="flex flex-wrap gap-1 mt-1">{cell.team?.map((m, i) => (<span key={i} className="bg-gray-100 text-[8px] px-1.5 py-0.5 rounded text-gray-600">{m}</span>))}</div></div></div>
+                  )}
                 </div>
               </div>
             ))}
