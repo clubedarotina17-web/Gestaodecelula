@@ -257,9 +257,9 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
       weeklyVisits: Number(formData.weeklyVisits),
       firstTimeVisitorsCount: Number(formData.firstTimeVisitorsCount),
       firstTimeVisitorsList: firstTimeVisitors,
-      childrenCount: (cell.type === 'Jovem' || cell.type === 'Juvenil') ? 0 : Number(formData.childrenCount),
+      childrenCount: (cell.type === 'Kids') ? Number(formData.childrenCount) : 0,
       offering: Number(formData.offering),
-      kidsOffering: (cell.type === 'Jovem' || cell.type === 'Juvenil') ? 0 : Number(formData.kidsOffering || 0),
+      kidsOffering: (cell.type === 'Kids') ? Number(formData.kidsOffering || 0) : 0,
       summary: formData.summary,
       isLate: isLate
     };
@@ -509,7 +509,7 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                   </>
                 )}
 
-                {!isJovemOuJuvenil && (
+                {cell.type === 'Kids' && (
                   <div className="space-y-1"><label className="text-[11px] font-bold text-blue-500 ml-1">Crianças (Total)</label><input type="number" min="0" placeholder="0" value={formData.childrenCount} onChange={(e) => setFormData({ ...formData, childrenCount: e.target.value })} className="w-full p-3.5 bg-white border-2 border-blue-50 rounded-xl outline-none focus:border-blue-400 text-sm font-bold" /></div>
                 )}
 
@@ -517,7 +517,7 @@ const LeaderDashboard: React.FC<LeaderDashboardProps> = ({ cell, reports, shares
                   <div className="space-y-1"><label className="text-[11px] font-bold text-gray-700 ml-1">Oferta (R$)</label><input type="number" min="0" step="0.01" value={formData.offering} onChange={(e) => setFormData({ ...formData, offering: e.target.value })} className="w-full p-3.5 bg-gray-50 border-none rounded-xl text-sm font-bold" /></div>
                 )}
 
-                {!isJovemOuJuvenil && (
+                {cell.type === 'Kids' && (
                   <div className="space-y-1"><label className="text-[11px] font-bold text-blue-500 ml-1">Oferta Kids (R$)</label><input type="number" min="0" step="0.01" placeholder="0.00" value={formData.kidsOffering} onChange={(e) => setFormData({ ...formData, kidsOffering: e.target.value })} className="w-full p-3.5 bg-white border-2 border-blue-50 rounded-xl outline-none focus:border-blue-400 text-sm font-bold" /></div>
                 )}
               </div>
