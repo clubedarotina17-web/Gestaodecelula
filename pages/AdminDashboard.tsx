@@ -538,7 +538,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0 pr-2">
                       <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><Clock className="w-5 h-5 md:w-6 md:h-6" /></div>
                       <div className="min-w-0">
-                        <p className="font-black text-primary text-[10px] md:text-xs uppercase leading-tight">Relatório pendente (Atrasado) de {new Date(item.dateStr + 'T12:00:00').toLocaleDateString()} - Célula: {item.cell.name} - {item.cell.day} e {item.cell.time}</p>
+                        <p className="font-black text-primary text-[10px] md:text-xs uppercase leading-tight">Relatório pendente (Atrasado) de {new Date(item.dateStr + 'T12:00:00').toLocaleDateString()} - Célula: {item.cell.name} / {item.cell.leader}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
@@ -864,7 +864,7 @@ const AdminDashboard: React.FC<AdminDashboardProps> = ({
                     <div className="flex items-center gap-3 md:gap-4 flex-1 min-w-0 pr-2">
                       <div className="w-10 h-10 md:w-12 md:h-12 bg-amber-50 text-amber-600 rounded-2xl flex items-center justify-center shrink-0 group-hover:scale-110 transition-transform"><Clock className="w-5 h-5 md:w-6 md:h-6" /></div>
                       <div className="min-w-0">
-                        <p className="font-black text-primary text-[10px] md:text-xs uppercase leading-tight">Relatório pendente de {new Date(item.dateStr + 'T12:00:00').toLocaleDateString()} - Célula Kids: {item.cell.name}</p>
+                        <p className="font-black text-primary text-[10px] md:text-xs uppercase leading-tight">Relatório pendente (Atrasado) de {new Date(item.dateStr + 'T12:00:00').toLocaleDateString()} - Célula: {item.cell.name} / {item.cell.leader}</p>
                       </div>
                     </div>
                     <div className="flex items-center gap-1.5 md:gap-2 shrink-0">
